@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920">
+<title>SupplyChain Pro — Dashboard</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #f0f4f8;
+    --surface:   #ffffff;
+    --surface2:  #f5f8fb;
+    --accent:    #0ecfc4;
+    --accent-dk: #035e7b;
+    --accent-lt: #e4faf9;
+    --dark:      #000d16;
+    --text:      #1a2a3a;
+    --muted:     #666e83;
+    --border:    #dde4ef;
+    --red:       #d03030;
+    --red-bg:    #fff2f2;
+    --red-bd:    #f9c8c8;
+    --amber:     #b87000;
+    --amb-bg:    #fffbee;
+    --amb-bd:    #f7df9a;
+    --green:     #097a5e;
+    --grn-bg:    #edfaf5;
+    --sb-w:      230px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html, body {
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+  }
+
+  /* ── LAYOUT ───────────────────────────── */
+  .app { display: flex; width: 1920px; height: 1080px; }
+
+  /* ── SIDEBAR ──────────────────────────── */
+  .sidebar {
+    width: var(--sb-w);
+    min-width: var(--sb-w);
+    background: var(--dark);
+    display: flex;
+    flex-direction: column;
+    height: 1080px;
+  }
+
+  .sb-logo {
+    padding: 22px 22px 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+  .sb-brand { font-size: 14px; font-weight: 700; color: #fff; letter-spacing: 0.1px; }
+  .sb-chip {
+    display: inline-block; font-size: 8px; background: var(--accent);
+    color: var(--dark); border-radius: 3px; padding: 1px 5px;
+    font-weight: 800; letter-spacing: 0.8px; margin-left: 5px;
+    vertical-align: middle; position: relative; top: -1px;
+  }
+  .sb-sub { font-size: 10px; color: #4a5a6e; margin-top: 4px; }
+
+  .sb-nav { flex: 1; padding: 8px 0; overflow-y: auto; }
+  .sb-nav::-webkit-scrollbar { display: none; }
+
+  .nav-grp-lbl {
+    font-size: 9px; color: #3a4e62; letter-spacing: 1.6px;
+    text-transform: uppercase; padding: 14px 22px 5px; font-weight: 600;
+  }
+
+  .nav-link-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 22px; font-size: 12px; color: #6a82a0;
+    text-decoration: none; border-left: 2px solid transparent;
+    transition: all 0.15s; cursor: pointer;
+  }
+  .nav-link-item:hover { color: #b0c4d8; background: rgba(255,255,255,0.04); }
+  .nav-link-item.active {
+    color: #fff; background: rgba(14,207,196,0.1);
+    border-left-color: var(--accent); font-weight: 500;
+  }
+  .nav-link-item svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+  .nav-badge {
+    margin-left: auto; background: var(--accent); color: var(--dark);
+    font-size: 9px; font-weight: 800; border-radius: 10px;
+    padding: 1px 7px; letter-spacing: 0.3px;
+  }
+
+  .sb-user {
+    padding: 16px 22px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    display: flex; align-items: center; gap: 11px;
+  }
+  .user-ava {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--accent-dk); display: flex; align-items: center;
+    justify-content: center; font-size: 11px; font-weight: 700;
+    color: var(--accent); flex-shrink: 0;
+  }
+  .user-name { font-size: 12px; color: #fff; font-weight: 500; }
+  .user-role { font-size: 10px; color: #4a5a6e; margin-top: 1px; }
+
+  /* ── MAIN ─────────────────────────────── */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* ── TOPBAR ───────────────────────────── */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .pg-title { font-size: 16px; font-weight: 700; color: var(--dark); }
+  .pg-sub { font-size: 10px; color: var(--muted); margin-top: 1px; }
+
+  /* HCI – Visibility of System Status */
+  .live-stamp {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 10px; color: var(--muted);
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 5px 13px;
+  }
+  .live-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
+    animation: blink 2s infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* HCI – Fitts's Law: large enough click targets */
+  .btn-sc-ghost {
+    background: transparent; color: var(--muted);
+    border: 1px solid var(--border); border-radius: 7px;
+    padding: 7px 18px; font-size: 12px; font-family: inherit;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .btn-sc-ghost:hover { border-color: var(--accent-dk); color: var(--accent-dk); }
+
+  .btn-sc-primary {
+    background: var(--accent); color: var(--dark);
+    border: none; border-radius: 7px; padding: 7px 18px;
+    font-size: 12px; font-weight: 700; font-family: inherit;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .btn-sc-primary:hover { background: var(--accent-dk); color: #fff; }
+
+  /* ── FILTER BAR – HCI: Active Filters / Error Prevention ── */
+  .filter-bar {
+    background: var(--surface2); border-bottom: 1px solid var(--border);
+    padding: 0 28px; height: 38px;
+    display: flex; align-items: center; gap: 8px;
+    flex-shrink: 0;
+  }
+  .fb-label { font-size: 10px; color: var(--muted); font-weight: 600; white-space: nowrap; }
+
+  .f-tag {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 10px; background: var(--accent-lt); color: var(--accent-dk);
+    border: 1px solid #abe8e4; border-radius: 5px; padding: 2px 9px;
+    font-weight: 600; white-space: nowrap;
+  }
+  .f-tag-x { cursor: pointer; opacity: 0.5; font-size: 12px; line-height: 1; }
+
+  /* HCI – Error Prevention: Reset View always visible */
+  .reset-view {
+    margin-left: auto; font-size: 10px; color: var(--red);
+    background: transparent; border: 1px solid var(--red-bd);
+    border-radius: 5px; padding: 3px 12px; font-family: inherit;
+    cursor: pointer; font-weight: 600;
+  }
+  .reset-view:hover { background: var(--red-bg); }
+
+  /* ── CONTENT ──────────────────────────── */
+  .content {
+    flex: 1; overflow-y: auto; padding: 20px 28px 20px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .content::-webkit-scrollbar { width: 5px; }
+  .content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* ── TILES – HCI: Miller's Law (4 KPIs) + Tufte (big number > chart) ── */
+  .tile-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px 22px;
+    position: relative; overflow: hidden;
+  }
+  .tile-card::before {
+    content: ''; position: absolute; top: 0; left: 0;
+    width: 4px; height: 100%; background: var(--t-accent, var(--accent));
+  }
+  .tile-lbl {
+    font-size: 10px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.9px; margin-bottom: 8px; font-weight: 600;
+  }
+  /* HCI: Large KPI number — single number beats a chart for at-a-glance reads */
+  .tile-val { font-size: 32px; font-weight: 700; color: var(--dark); line-height: 1; margin-bottom: 6px; }
+  .tile-delta { font-size: 11px; display: flex; align-items: center; gap: 3px; }
+  .up   { color: var(--green); }
+  .down { color: var(--red); }
+  .warn { color: var(--amber); }
+
+  /* ── CARD ─────────────────────────────── */
+  .sc-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px 22px;
+  }
+  .sc-card-hd { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+  .sc-card-title { font-size: 13px; font-weight: 700; color: var(--dark); }
+  .sc-card-sub { font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+  select.sc-sel {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px; color: var(--muted); font-size: 10px;
+    padding: 5px 10px; font-family: inherit; cursor: pointer;
+  }
+
+  /* HCI: Line chart for time-series (mental model / affordance) */
+  .chart-area { height: 200px; }
+
+  /* ── ALERTS – HCI: Visibility of System Status ── */
+  .alert-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 12px; border-radius: 8px;
+    border: 1px solid; margin-bottom: 7px;
+  }
+  .alert-item:last-child { margin-bottom: 0; }
+  .a-err  { background: var(--red-bg);  border-color: var(--red-bd); }
+  .a-info { background: var(--accent-lt); border-color: #abe8e4; }
+  .a-warn { background: var(--amb-bg);  border-color: var(--amb-bd); }
+
+  .a-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+  .dot-r { background: var(--red); }
+  .dot-t { background: var(--accent); }
+  .dot-a { background: var(--amber); }
+
+  .a-text { font-size: 11px; color: var(--text); line-height: 1.5; }
+  .a-time { font-size: 9px; color: var(--muted); margin-top: 2px; }
+
+  /* ── TABLE – HCI: F-pattern bottom = detail/deep-dive ── */
+  .table-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
+  }
+  .table-top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 22px 12px; border-bottom: 1px solid var(--border);
+  }
+
+  .sc-search {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 7px; padding: 6px 14px; font-size: 11px;
+    color: var(--text); font-family: inherit; width: 230px;
+  }
+  .sc-search::placeholder { color: var(--muted); }
+
+  .f-btns { display: flex; gap: 5px; }
+  .f-btn {
+    font-size: 10px; color: var(--muted); background: transparent;
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 4px 13px; cursor: pointer; font-family: inherit; transition: all 0.12s;
+  }
+  .f-btn:hover { border-color: var(--accent-dk); color: var(--accent-dk); }
+  .f-btn.on {
+    background: var(--accent-lt); border-color: #abe8e4;
+    color: var(--accent-dk); font-weight: 700;
+  }
+
+  /* HCI: Tufte — very subtle gridlines, data stands out */
+  .sc-table { width: 100%; border-collapse: collapse; }
+  .sc-table thead th {
+    font-size: 9.5px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 1px; padding: 9px 20px; text-align: left;
+    background: var(--surface2); border-bottom: 1px solid var(--border);
+    font-weight: 600; white-space: nowrap;
+  }
+  .sc-table tbody td {
+    font-size: 12px; color: var(--text); padding: 11px 20px;
+    border-bottom: 1px solid #edf1f7; vertical-align: middle;
+  }
+  .sc-table tbody tr:last-child td { border-bottom: none; }
+  .sc-table tbody tr:hover td { background: #f8fafd; }
+
+  .mono-lbl { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
+  .cat-lbl  { font-size: 10px; color: var(--muted); }
+  .price-lbl{ font-weight: 600; color: var(--dark); }
+
+  /* HCI: Color semantics – red = danger, green = good, amber = caution */
+  .badge-sc {
+    font-size: 9px; font-weight: 700; border-radius: 5px;
+    padding: 2px 9px; letter-spacing: 0.4px; display: inline-block;
+  }
+  .b-ok  { background: var(--grn-bg); color: var(--green); }
+  .b-low { background: var(--red-bg); color: var(--red); }
+  .b-ord { background: var(--amb-bg); color: var(--amber); }
+
+  .stk-wrap { display: flex; align-items: center; gap: 9px; }
+  .stk-bar  {
+    height: 5px; border-radius: 3px; background: #e8edf5;
+    flex: 1; min-width: 70px; overflow: hidden;
+  }
+  .stk-fill { height: 100%; border-radius: 3px; }
+  .stk-num  { font-size: 11px; color: var(--muted); min-width: 40px; text-align: right; }
+
+  .table-foot {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 22px; border-top: 1px solid var(--border);
+  }
+  .foot-info { font-size: 10px; color: var(--muted); }
+
+  /* ── QUICK ACTIONS – HCI: Fitts's law ── */
+  .qa-btn {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 6px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 10px; cursor: pointer;
+    font-size: 10px; color: var(--muted); font-family: inherit;
+    transition: all 0.15s; text-align: center; line-height: 1.3;
+  }
+  .qa-btn:hover { background: var(--accent-lt); border-color: #abe8e4; color: var(--accent-dk); }
+  .qa-btn svg { width: 20px; height: 20px; }
+
+  /* ── TOP PRODUCTS ── */
+  .tp-item { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid #edf1f7; }
+  .tp-item:last-child { border-bottom: none; }
+  .tp-rank { font-size: 11px; font-weight: 700; color: var(--muted); min-width: 18px; }
+  .tp-name { font-size: 11px; color: var(--text); flex: 1; line-height: 1.3; }
+  .tp-cat  { font-size: 10px; color: var(--muted); }
+  .tp-bar  { height: 4px; background: #e8edf5; border-radius: 2px; overflow: hidden; width: 80px; }
+  .tp-fill { height: 100%; border-radius: 2px; background: var(--accent); }
+  .tp-val  { font-size: 11px; font-weight: 600; color: var(--dark); min-width: 50px; text-align: right; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ══ SIDEBAR ═══════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-brand">SupplyChain<span class="sb-chip">PRO</span></div>
+      <div class="sb-sub">B2B Wholesale · PC Components</div>
+    </div>
+
+    <nav class="sb-nav">
+      <div class="nav-grp-lbl">Main</div>
+
+      <a class="nav-link-item active" href="dashboard-admin.html" onclick="return false;">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.2" fill="currentColor"/><rect x="9" y="1" width="6" height="6" rx="1.2" fill="currentColor" opacity=".45"/><rect x="1" y="9" width="6" height="6" rx="1.2" fill="currentColor" opacity=".45"/><rect x="9" y="9" width="6" height="6" rx="1.2" fill="currentColor" opacity=".45"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-link-item" href="inventory-list.html">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3" width="13" height="10" rx="1.4" stroke="currentColor" stroke-width="1.2"/><path d="M5 8h6M8 5v6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Inventory
+      </a>
+      <a class="nav-link-item" href="supplier-purchase-order-inbox.html">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M2 2h9l2.5 3H2V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><rect x="2" y="5" width="12" height="9" rx="1.2" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 9.5h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Purchase Orders
+        <span class="nav-badge">4</span>
+      </a>
+      <a class="nav-link-item" onclick="alert('Invoices page not yet created')">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="1.5" width="12" height="13" rx="1.4" stroke="currentColor" stroke-width="1.2"/><path d="M5 5.5h6M5 8h6M5 10.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Invoices
+      </a>
+      <a class="nav-link-item" onclick="alert('Retailers page not yet created')">
+        <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.2"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Retailers
+      </a>
+
+      <div class="nav-grp-lbl" style="margin-top:4px;">Reports</div>
+      <a class="nav-link-item" href="dashboard-admin.html" onclick="return false;">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M2 12 L5 7 L8 9 L11 4 L14 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Analytics
+      </a>
+      <a class="nav-link-item" href="dashboard-admin.html" onclick="return false;">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3" width="13" height="10" rx="1.4" stroke="currentColor" stroke-width="1.2"/><path d="M5 8h2M9 6h2M5 10h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Sales Reports
+      </a>
+
+      <div class="nav-grp-lbl" style="margin-top:4px;">System</div>
+      <a class="nav-link-item" onclick="alert('Settings page not yet created')">
+        <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3 3l1.1 1.1M11.9 11.9L13 13M3 13l1.1-1.1M11.9 4.1L13 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Settings
+      </a>
+    </nav>
+
+    <div class="sb-user">
+      <div class="user-ava">JD</div>
+      <div>
+        <div class="user-name">Juan Dela Cruz</div>
+        <div class="user-role">Supplier · Admin</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ══ MAIN ═══════════════════════════════════════ -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div>
+        <div class="pg-title">Dashboard Overview</div>
+        <div class="pg-sub">Monday, April 6 2026 &nbsp;·&nbsp; Q2 Week 1</div>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <!-- HCI: Visibility of System Status -->
+        <div class="live-stamp">
+          <div class="live-dot"></div>
+          Live &nbsp;·&nbsp; Last updated 3 min ago
+        </div>
+        <button class="btn-sc-ghost" onclick="alert('Export CSV functionality will download your dashboard data')">Export CSV</button>
+        <button class="btn-sc-primary" onclick="alert('Add Product page not yet created')">+ Add Product</button>
+      </div>
+    </div>
+
+    <!-- FILTER BAR — HCI: Visibility of active params + Error Prevention -->
+    <div class="filter-bar">
+      <span class="fb-label">Active filters:</span>
+      <div class="f-tag">Category: All <span class="f-tag-x">×</span></div>
+      <div class="f-tag">Date: Apr 2026 <span class="f-tag-x">×</span></div>
+      <div class="f-tag">Warehouse: Main <span class="f-tag-x">×</span></div>
+      <div class="f-tag">Status: All <span class="f-tag-x">×</span></div>
+      <button class="reset-view">↺ Reset View</button>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- ROW 1: KPI TILES — HCI: F-pattern top-left, Miller's Law (4 tiles), Tufte (big number) -->
+      <div class="row g-3">
+        <div class="col-3">
+          <div class="tile-card" style="--t-accent:#0ecfc4;">
+            <div class="tile-lbl">Active Contracts</div>
+            <div class="tile-val">38</div>
+            <div class="tile-delta up">▲ +12% vs last month</div>
+          </div>
+        </div>
+        <div class="col-3">
+          <div class="tile-card" style="--t-accent:#035e7b;">
+            <div class="tile-lbl">Revenue This Month</div>
+            <div class="tile-val">₱2.4M</div>
+            <div class="tile-delta up">▲ +8.3% vs last month</div>
+          </div>
+        </div>
+        <div class="col-3">
+          <div class="tile-card" style="--t-accent:#b87000;">
+            <div class="tile-lbl">Pending Purchase Orders</div>
+            <div class="tile-val">4</div>
+            <div class="tile-delta warn">● Awaiting supplier approval</div>
+          </div>
+        </div>
+        <div class="col-3">
+          <div class="tile-card" style="--t-accent:#d03030;">
+            <div class="tile-lbl">Low Stock SKUs</div>
+            <div class="tile-val">7</div>
+            <div class="tile-delta down">▼ Below reorder threshold</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROW 2: CHART + ALERTS + TOP PRODUCTS -->
+      <!-- HCI: F-pattern — center = trends, right = secondary/alerts -->
+      <div class="row g-3">
+
+        <!-- HCI: Line chart for time-series (mental model/affordance) -->
+        <!-- HCI: Gestalt Similarity — teal always = Revenue throughout whole dashboard -->
+        <div class="col-5">
+          <div class="sc-card h-100">
+            <div class="sc-card-hd">
+              <div>
+                <div class="sc-card-title">Monthly Sales Trend</div>
+                <div class="sc-card-sub">
+                  <span style="color:#0ecfc4;font-weight:700;">━</span> Revenue &nbsp;
+                  <span style="color:#035e7b;font-weight:700;">━</span> Units Sold &nbsp;·&nbsp; Jan–Apr 2026
+                </div>
+              </div>
+              <div class="d-flex gap-2 align-items-center">
+                <select class="sc-sel">
+                  <option>Q1–Q2 2026</option>
+                  <option>Full Year 2025</option>
+                </select>
+              </div>
+            </div>
+            <div class="chart-area">
+              <canvas id="salesChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- TOP PRODUCTS — HCI: Bar chart for comparison (mental model) -->
+        <div class="col-4">
+          <div class="sc-card h-100">
+            <div class="sc-card-hd">
+              <div>
+                <div class="sc-card-title">Top Products by Demand</div>
+                <div class="sc-card-sub">Units moved · Apr 2026</div>
+              </div>
+            </div>
+            <div class="tp-item">
+              <div class="tp-rank">#1</div>
+              <div><div class="tp-name">Samsung 990 Pro NVMe 2TB</div><div class="tp-cat">Storage</div></div>
+              <div class="tp-bar"><div class="tp-fill" style="width:100%"></div></div>
+              <div class="tp-val">390 units</div>
+            </div>
+            <div class="tp-item">
+              <div class="tp-rank">#2</div>
+              <div><div class="tp-name">Corsair RM1000x 80+ Gold</div><div class="tp-cat">PSU</div></div>
+              <div class="tp-bar"><div class="tp-fill" style="width:80%"></div></div>
+              <div class="tp-val">312 units</div>
+            </div>
+            <div class="tp-item">
+              <div class="tp-rank">#3</div>
+              <div><div class="tp-name">Crucial DDR5 32GB 6000MHz</div><div class="tp-cat">Memory</div></div>
+              <div class="tp-bar"><div class="tp-fill" style="width:60%"></div></div>
+              <div class="tp-val">234 units</div>
+            </div>
+            <div class="tp-item">
+              <div class="tp-rank">#4</div>
+              <div><div class="tp-name">ASUS ROG Maximus Z790</div><div class="tp-cat">Motherboard</div></div>
+              <div class="tp-bar"><div class="tp-fill" style="width:45%"></div></div>
+              <div class="tp-val">175 units</div>
+            </div>
+            <div class="tp-item">
+              <div class="tp-rank">#5</div>
+              <div><div class="tp-name">NVIDIA RTX 5080 16GB</div><div class="tp-cat">GPU</div></div>
+              <div class="tp-bar"><div class="tp-fill" style="width:30%"></div></div>
+              <div class="tp-val">116 units</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ALERT CENTER — HCI: Visibility of System Status -->
+        <div class="col-3">
+          <div class="sc-card h-100">
+            <div class="sc-card-hd">
+              <div>
+                <div class="sc-card-title">Alert Center</div>
+                <div class="sc-card-sub">Urgent notifications</div>
+              </div>
+              <span style="font-size:9px;color:var(--red);background:var(--red-bg);padding:2px 9px;border-radius:5px;border:1px solid var(--red-bd);font-weight:700;">3 urgent</span>
+            </div>
+            <!-- HCI: Color semantics — red = bad, teal = info, amber = warning -->
+            <div class="alert-item a-err">
+              <div class="a-dot dot-r"></div>
+              <div>
+                <div class="a-text"><strong>Stock Low!</strong> — NVIDIA RTX 5080 16GB at 5 units remaining</div>
+                <div class="a-time">2 hours ago</div>
+              </div>
+            </div>
+            <div class="alert-item a-info">
+              <div class="a-dot dot-t"></div>
+              <div>
+                <div class="a-text">New PO from TechZone PH — ₱284,000 pending review</div>
+                <div class="a-time">4 hours ago</div>
+              </div>
+            </div>
+            <div class="alert-item a-err">
+              <div class="a-dot dot-r"></div>
+              <div>
+                <div class="a-text"><strong>Stock Low!</strong> — Intel Core i9-14900K at 3 units remaining</div>
+                <div class="a-time">Yesterday</div>
+              </div>
+            </div>
+            <div class="alert-item a-warn">
+              <div class="a-dot dot-a"></div>
+              <div>
+                <div class="a-text">Reorder point reached — Crucial DDR5 32GB 6000MHz</div>
+                <div class="a-time">Yesterday</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROW 3: MASTER LIST — HCI: F-pattern bottom = deep-dive detail -->
+      <div class="row g-3">
+        <div class="col-12">
+          <div class="table-card">
+            <div class="table-top">
+              <div>
+                <div class="sc-card-title">Inventory Master List</div>
+                <div class="sc-card-sub" style="margin-top:2px;">PC Components · 148 products total</div>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <div class="f-btns">
+                  <button class="f-btn on">All</button>
+                  <button class="f-btn">Active</button>
+                  <button class="f-btn">Low Stock</button>
+                  <button class="f-btn">GPU</button>
+                  <button class="f-btn">CPU</button>
+                  <button class="f-btn">Memory</button>
+                  <button class="f-btn">Storage</button>
+                </div>
+                <!-- HCI: Fitts's Law — wide search target -->
+                <input class="sc-search" placeholder="Search by SKU or product name…">
+              </div>
+            </div>
+
+            <table class="sc-table">
+              <thead>
+                <tr>
+                  <th>SKU</th>
+                  <th>Product Name</th>
+                  <th>Category</th>
+                  <th>Tier 1 Price</th>
+                  <th>Tier 2 Price</th>
+                  <th>Bulk Unit</th>
+                  <th>Stock Level</th>
+                  <th>Status</th>
+                  <th>Last Updated</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="mono-lbl">GPU-5080-16G</span></td>
+                  <td>NVIDIA GeForce RTX 5080 16GB GDDR7</td>
+                  <td><span class="cat-lbl">GPU</span></td>
+                  <td><span class="price-lbl">₱68,500</span></td>
+                  <td><span class="price-lbl">₱65,200</span></td>
+                  <td class="text-muted" style="font-size:11px;">1 pc / box</td>
+                  <td><div class="stk-wrap"><div class="stk-bar"><div class="stk-fill" style="width:3%;background:#d03030;"></div></div><span class="stk-num">5</span></div></td>
+                  <td><span class="badge-sc b-low">LOW STOCK</span></td>
+                  <td style="font-size:10px;color:var(--muted);">Apr 6, 09:14</td>
+                  <td><button class="f-btn" style="font-size:9.5px;">Edit</button></td>
+                </tr>
+                <tr>
+                  <td><span class="mono-lbl">CPU-14900K-S</span></td>
+                  <td>Intel Core i9-14900K 3.2GHz 36MB Cache</td>
+                  <td><span class="cat-lbl">CPU</span></td>
+                  <td><span class="price-lbl">₱24,900</span></td>
+                  <td><span class="price-lbl">₱23,600</span></td>
+                  <td class="text-muted" style="font-size:11px;">1 pc / tray</td>
+                  <td><div class="stk-wrap"><div class="stk-bar"><div class="stk-fill" style="width:2%;background:#d03030;"></div></div><span class="stk-num">3</span></div></td>
+                  <td><span class="badge-sc b-low">LOW STOCK</span></td>
+                  <td style="font-size:10px;color:var(--muted);">Apr 6, 08:40</td>
+                  <td><button class="f-btn" style="font-size:9.5px;">Edit</button></td>
+                </tr>
+                <tr>
+                  <td><span class="mono-lbl">RAM-D5-32-6K</span></td>
+                  <td>Crucial DDR5 32GB Dual Kit 6000MHz CL36</td>
+                  <td><span class="cat-lbl">Memory</span></td>
+                  <td><span class="price-lbl">₱8,200</span></td>
+                  <td><span class="price-lbl">₱7,750</span></td>
+                  <td class="text-muted" style="font-size:11px;">5 kits / box</td>
+                  <td><div class="stk-wrap"><div class="stk-bar"><div class="stk-fill" style="width:32%;background:#b87000;"></div></div><span class="stk-num">70</span></div></td>
+                  <td><span class="badge-sc b-ord">REORDER</span></td>
+                  <td style="font-size:10px;color:var(--muted);">Apr 5, 15:55</td>
+                  <td><button class="f-btn" style="font-size:9.5px;">Edit</button></td>
+                </tr>
+                <tr>
+                  <td><span class="mono-lbl">SSD-990P-2TB</span></td>
+                  <td>Samsung 990 Pro M.2 NVMe PCIe 4.0 2TB</td>
+                  <td><span class="cat-lbl">Storage</span></td>
+                  <td><span class="price-lbl">₱7,800</span></td>
+                  <td><span class="price-lbl">₱7,350</span></td>
+                  <td class="text-muted" style="font-size:11px;">10 pcs / carton</td>
+                  <td><div class="stk-wrap"><div class="stk-bar"><div class="stk-fill" style="width:80%;background:#0ecfc4;"></div></div><span class="stk-num">390</span></div></td>
+                  <td><span class="badge-sc b-ok">ACTIVE</span></td>
+                  <td style="font-size:10px;color:var(--muted);">Apr 5, 11:20</td>
+                  <td><button class="f-btn" style="font-size:9.5px;">Edit</button></td>
+                </tr>
+                <tr>
+                  <td><span class="mono-lbl">MB-Z790-ATX</span></td>
+                  <td>ASUS ROG Maximus Z790 Hero ATX LGA1700</td>
+                  <td><span class="cat-lbl">Motherboard</span></td>
+                  <td><span class="price-lbl">₱32,000</span></td>
+                  <td><span class="price-lbl">₱30,400</span></td>
+                  <td class="text-muted" style="font-size:11px;">1 pc / box</td>
+                  <td><div class="stk-wrap"><div class="stk-bar"><div class="stk-fill" style="width:60%;background:#0ecfc4;"></div></div><span class="stk-num">124</span></div></td>
+                  <td><span class="badge-sc b-ok">ACTIVE</span></td>
+                  <td style="font-size:10px;color:var(--muted);">Apr 4, 09:10</td>
+                  <td><button class="f-btn" style="font-size:9.5px;">Edit</button></td>
+                </tr>
+                <tr>
+                  <td><span class="mono-lbl">PSU-1000W-80P</span></td>
+                  <td>Corsair RM1000x 80+ Gold Fully Modular ATX</td>
+                  <td><span class="cat-lbl">PSU</span></td>
+                  <td><span class="price-lbl">₱9,400</span></td>
+                  <td><span class="price-lbl">₱8,900</span></td>
+                  <td class="text-muted" style="font-size:11px;">5 pcs / pallet</td>
+                  <td><div class="stk-wrap"><div class="stk-bar"><div class="stk-fill" style="width:90%;background:#0ecfc4;"></div></div><span class="stk-num">440</span></div></td>
+                  <td><span class="badge-sc b-ok">ACTIVE</span></td>
+                  <td style="font-size:10px;color:var(--muted);">Apr 3, 14:05</td>
+                  <td><button class="f-btn" style="font-size:9.5px;">Edit</button></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="table-foot">
+              <span class="foot-info">Showing 6 of 148 products &nbsp;·&nbsp; Page 1 of 25</span>
+              <div class="f-btns">
+                <button class="f-btn">← Prev</button>
+                <button class="f-btn on">1</button>
+                <button class="f-btn">2</button>
+                <button class="f-btn">3</button>
+                <button class="f-btn">…</button>
+                <button class="f-btn">25</button>
+                <button class="f-btn">Next →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const ctx = document.getElementById('salesChart').getContext('2d');
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr'],
+    datasets: [
+      {
+        label: 'Revenue (₱M)',
+        data: [1.8, 2.1, 2.0, 2.4],
+        borderColor: '#0ecfc4',
+        backgroundColor: 'rgba(14,207,196,0.08)',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#0ecfc4',
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        tension: 0.4,
+        fill: true,
+        yAxisID: 'y'
+      },
+      {
+        label: 'Units Sold (×100)',
+        data: [1.2, 1.5, 1.4, 1.7],
+        borderColor: '#035e7b',
+        backgroundColor: 'rgba(3,94,123,0.06)',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#035e7b',
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        tension: 0.4,
+        fill: true,
+        yAxisID: 'y'
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#fff',
+        borderColor: '#dde4ef',
+        borderWidth: 1,
+        titleColor: '#1a2a3a',
+        bodyColor: '#666e83',
+        padding: 12,
+        titleFont: { size: 11 },
+        bodyFont: { size: 10 }
+      }
+    },
+    scales: {
+      // HCI: Tufte — subtle gridlines, near-invisible, data stands out
+      x: {
+        grid: { color: 'rgba(220,228,240,0.7)', lineWidth: 1 },
+        ticks: { color: '#666e83', font: { size: 10 } },
+        border: { display: false }
+      },
+      y: {
+        grid: { color: 'rgba(220,228,240,0.7)', lineWidth: 1 },
+        ticks: { color: '#666e83', font: { size: 10 } },
+        border: { display: false }
+      }
+    }
+  }
+});
+
+// Filter button toggle
+document.querySelectorAll('.f-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const group = this.closest('.f-btns');
+    if (group) {
+      group.querySelectorAll('.f-btn').forEach(b => b.classList.remove('on'));
+      this.classList.add('on');
+    }
+  });
+});
+
+// Connect Edit buttons in inventory table
+document.addEventListener('DOMContentLoaded', function() {
+  // Edit buttons - direct actions
+  const editButtons = document.querySelectorAll('.sc-table tbody .f-btn');
+  editButtons.forEach((btn, index) => {
+    if (btn.textContent.includes('Edit')) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        alert('Edit product functionality: Product ' + (index + 1) + ' editor would open here');
+      });
+    }
+  });
+});
+</script>
+<script src="sc-nav.js"></script>
+</body>
+</html>

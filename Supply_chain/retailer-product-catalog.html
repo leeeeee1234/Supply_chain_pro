@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920">
+<title>SupplyChain Pro — Product Catalog (Retailer)</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #f0f4f8;
+    --surface:   #ffffff;
+    --surface2:  #f5f8fb;
+    --accent:    #0ecfc4;
+    --accent-dk: #035e7b;
+    --accent-lt: #e4faf9;
+    --dark:      #000d16;
+    --text:      #1a2a3a;
+    --muted:     #666e83;
+    --border:    #dde4ef;
+    --red:       #d03030;
+    --red-bg:    #fff2f2;
+    --red-bd:    #f9c8c8;
+    --amber:     #b87000;
+    --amb-bg:    #fffbee;
+    --amb-bd:    #f7df9a;
+    --green:     #097a5e;
+    --grn-bg:    #edfaf5;
+    --sb-w:      230px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html, body {
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+  }
+
+  /* ── LAYOUT & SIDEBAR ─────────────────── */
+  .app { display: flex; width: 1920px; height: 1080px; }
+
+  .sidebar {
+    width: var(--sb-w);
+    min-width: var(--sb-w);
+    background: var(--dark);
+    display: flex; flex-direction: column; height: 1080px;
+  }
+  .sb-logo {
+    padding: 22px 22px 18px; border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+  .sb-brand { font-size: 14px; font-weight: 700; color: #fff; letter-spacing: 0.1px; }
+  .sb-chip {
+    display: inline-block; font-size: 8px; background: var(--accent);
+    color: var(--dark); border-radius: 3px; padding: 1px 5px;
+    font-weight: 800; letter-spacing: 0.8px; margin-left: 5px;
+    vertical-align: middle; position: relative; top: -1px;
+  }
+  .sb-sub { font-size: 10px; color: #4a5a6e; margin-top: 4px; }
+
+  .sb-nav { flex: 1; padding: 8px 0; overflow-y: auto; }
+  .nav-grp-lbl {
+    font-size: 9px; color: #3a4e62; letter-spacing: 1.6px;
+    text-transform: uppercase; padding: 14px 22px 5px; font-weight: 600;
+  }
+  .nav-link-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 22px; font-size: 12px; color: #6a82a0;
+    text-decoration: none; border-left: 2px solid transparent;
+    transition: all 0.15s; cursor: pointer;
+  }
+  .nav-link-item:hover { color: #b0c4d8; background: rgba(255,255,255,0.04); }
+  .nav-link-item.active {
+    color: #fff; background: rgba(14,207,196,0.1);
+    border-left-color: var(--accent); font-weight: 500;
+  }
+  .nav-link-item svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .nav-badge {
+    margin-left: auto; background: var(--amber); color: #fff;
+    font-size: 9px; font-weight: 800; border-radius: 10px;
+    padding: 1px 7px; letter-spacing: 0.3px;
+  }
+
+  .sb-user {
+    padding: 16px 22px; border-top: 1px solid rgba(255,255,255,0.07);
+    display: flex; align-items: center; gap: 11px;
+  }
+  .user-ava {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: #2a3a4a; display: flex; align-items: center;
+    justify-content: center; font-size: 11px; font-weight: 700;
+    color: #fff; flex-shrink: 0;
+  }
+  .user-name { font-size: 12px; color: #fff; font-weight: 500; }
+  .user-role { font-size: 10px; color: #4a5a6e; margin-top: 1px; }
+
+  /* ── MAIN & TOPBAR ────────────────────── */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  .topbar {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 0 28px; height: 60px;
+    display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+  }
+  .pg-title { font-size: 16px; font-weight: 700; color: var(--dark); }
+  .pg-sub { font-size: 10px; color: var(--muted); margin-top: 1px; }
+
+  .btn-sc-ghost {
+    background: transparent; color: var(--muted);
+    border: 1px solid var(--border); border-radius: 7px;
+    padding: 7px 18px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-sc-ghost:hover { border-color: var(--dark); color: var(--dark); }
+  
+  .btn-sc-primary {
+    background: var(--accent); color: var(--dark);
+    border: none; border-radius: 7px; padding: 7px 18px;
+    font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-sc-primary:hover { background: var(--accent-dk); color: #fff; }
+
+  /* ── CONTENT AREA ─────────────────────── */
+  .content {
+    flex: 1; overflow-y: auto; padding: 28px 40px;
+    display: flex; flex-direction: column;
+  }
+  .content::-webkit-scrollbar { width: 6px; }
+  .content::-webkit-scrollbar-thumb { background: #cbd4e1; border-radius: 4px; }
+
+  /* ── CATEGORY CAROUSEL ────────────────── */
+  .cat-header {
+    text-align: center; font-size: 22px; font-weight: 800; color: var(--dark);
+    text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px;
+  }
+  
+  .carousel-container {
+    display: flex; align-items: center; gap: 20px; justify-content: center;
+  }
+  
+  .nav-arrow {
+    width: 40px; height: 40px; border-radius: 50%; background: var(--surface);
+    border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+    color: var(--dark); cursor: pointer; transition: all 0.15s; font-weight: bold; font-size: 18px;
+  }
+  .nav-arrow:hover { background: var(--surface2); border-color: var(--dark); }
+
+  .cat-track {
+    display: flex; gap: 16px; overflow: hidden; width: 850px;
+  }
+  
+  .cat-box {
+    width: 125px; height: 125px; background: #e0e6ed; border-radius: 12px;
+    flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s; border: 2px solid transparent; color: var(--muted);
+  }
+  .cat-box:hover { background: #d3dbe4; color: var(--dark); }
+  .cat-box.active { border-color: var(--dark); background: var(--surface); color: var(--dark); font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+  .cat-icon { font-size: 32px; margin-bottom: 8px; color: inherit; }
+  .cat-name { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* ── DIVIDER ──────────────────────────── */
+  .thick-divider {
+    height: 18px; background-color: var(--dark); width: 100%;
+    margin: 40px 0 30px; border-radius: 4px;
+  }
+
+  /* ── PRODUCT GRID ─────────────────────── */
+  .catalog-controls {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+  }
+  .sc-search {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 7px; padding: 8px 16px; font-size: 12px;
+    color: var(--text); font-family: inherit; width: 320px;
+  }
+
+  .product-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden; transition: all 0.2s;
+    display: flex; flex-direction: column; height: 100%;
+  }
+  .product-card:hover { border-color: var(--accent-dk); box-shadow: 0 8px 24px rgba(3, 94, 123, 0.08); transform: translateY(-3px); }
+  
+  /* Tall dark image area mimicking the wireframe */
+  .pc-img-area {
+    height: 240px; background: var(--dark); position: relative;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .pc-img-placeholder {
+    color: rgba(255,255,255,0.1); font-size: 64px;
+  }
+  .pc-badge {
+    position: absolute; top: 12px; left: 12px; background: var(--accent);
+    color: var(--dark); font-size: 9px; font-weight: 800; padding: 3px 8px; border-radius: 5px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+
+  .pc-body { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+  .pc-sku { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-bottom: 4px; }
+  .pc-title { font-size: 15px; font-weight: 700; color: var(--dark); line-height: 1.3; margin-bottom: 6px; }
+  .pc-desc { font-size: 11px; color: var(--muted); margin-bottom: 16px; line-height: 1.4; flex: 1; }
+
+  .pc-price-tier {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; margin-bottom: 16px;
+  }
+  .tier-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .tier-row:last-child { margin-bottom: 0; }
+  .tier-lbl { font-size: 10px; color: var(--muted); }
+  .tier-val { font-size: 13px; font-weight: 700; color: var(--dark); }
+  .tier-val.bulk { color: var(--accent-dk); font-size: 14px; }
+
+  .pc-actions { display: flex; gap: 8px; align-items: stretch; }
+  .qty-input {
+    width: 60px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface);
+    text-align: center; font-size: 13px; font-weight: 600; color: var(--dark); font-family: inherit;
+  }
+  .btn-add {
+    flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--dark);
+    font-size: 12px; font-weight: 700; border-radius: 6px; cursor: pointer; transition: all 0.15s;
+  }
+  .btn-add:hover { background: var(--dark); color: #fff; border-color: var(--dark); }
+
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-brand">SupplyChain<span class="sb-chip">PRO</span></div>
+      <div class="sb-sub">B2B Wholesale · Client Portal</div>
+    </div>
+
+    <nav class="sb-nav">
+      <div class="nav-grp-lbl">Marketplace</div>
+      <a class="nav-link-item">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.2" fill="currentColor"/><rect x="9" y="1" width="6" height="6" rx="1.2" fill="currentColor" opacity=".45"/><rect x="1" y="9" width="6" height="6" rx="1.2" fill="currentColor" opacity=".45"/><rect x="9" y="9" width="6" height="6" rx="1.2" fill="currentColor" opacity=".45"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-link-item active">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3" width="13" height="10" rx="1.4" stroke="currentColor" stroke-width="1.2"/><path d="M5 8h6M8 5v6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Product Catalog
+      </a>
+      
+      <div class="nav-grp-lbl" style="margin-top:4px;">Purchasing</div>
+      <a class="nav-link-item">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M3 3h10l-1 6H4L3 3z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="5" cy="13" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="11" cy="13" r="1.5" stroke="currentColor" stroke-width="1.2"/></svg>
+        Order Builder
+        <span class="nav-badge">2 items</span>
+      </a>
+      <a class="nav-link-item">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M2 2h9l2.5 3H2V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><rect x="2" y="5" width="12" height="9" rx="1.2" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 9.5h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        My Orders
+      </a>
+      <a class="nav-link-item">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="1.5" width="12" height="13" rx="1.4" stroke="currentColor" stroke-width="1.2"/><path d="M5 5.5h6M5 8h6M5 10.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Invoices
+      </a>
+
+      <div class="nav-grp-lbl" style="margin-top:4px;">Account</div>
+      <a class="nav-link-item">
+        <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3 3l1.1 1.1M11.9 11.9L13 13M3 13l1.1-1.1M11.9 4.1L13 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Settings
+      </a>
+    </nav>
+
+    <div class="sb-user">
+      <div class="user-ava">TZ</div>
+      <div>
+        <div class="user-name">TechZone PH</div>
+        <div class="user-role">Retailer · Client</div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+
+    <div class="topbar">
+      <div>
+        <div class="pg-title">Product Catalog</div>
+        <div class="pg-sub">Browse wholesale components and build your Purchase Order.</div>
+      </div>
+      <div class="d-flex align-items-center gap-3">
+        <button class="btn-sc-ghost">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          Download Price List
+        </button>
+        <button class="btn-sc-primary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+          View Current Order (₱148,400)
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="cat-header">Category</div>
+      
+      <div class="carousel-container">
+        <button class="nav-arrow">‹</button>
+        
+        <div class="cat-track">
+          <div class="cat-box active">
+            <div class="cat-icon">⚡</div>
+            <div class="cat-name">All Items</div>
+          </div>
+          <div class="cat-box">
+            <div class="cat-icon">🖥️</div>
+            <div class="cat-name">Monitors</div>
+          </div>
+          <div class="cat-box">
+            <div class="cat-icon">🎮</div>
+            <div class="cat-name">GPUs</div>
+          </div>
+          <div class="cat-box">
+            <div class="cat-icon">🧠</div>
+            <div class="cat-name">CPUs</div>
+          </div>
+          <div class="cat-box">
+            <div class="cat-icon">💽</div>
+            <div class="cat-name">Storage</div>
+          </div>
+          <div class="cat-box">
+            <div class="cat-icon">🕹️</div>
+            <div class="cat-name">Peripherals</div>
+          </div>
+        </div>
+
+        <button class="nav-arrow">›</button>
+      </div>
+
+      <div class="thick-divider"></div>
+
+      <div class="catalog-controls">
+        <div style="font-size: 12px; color: var(--muted); font-weight: 600;">
+          Showing 148 products in <span style="color: var(--dark);">All Items</span>
+        </div>
+        <div class="d-flex gap-3">
+          <select style="background: var(--surface); border: 1px solid var(--border); border-radius: 7px; padding: 8px 12px; font-size: 12px; color: var(--muted);">
+            <option>Sort by: Popularity</option>
+            <option>Price: Low to High</option>
+            <option>Price: High to Low</option>
+          </select>
+          <input type="text" class="sc-search" placeholder="Search product name, SKU...">
+        </div>
+      </div>
+
+      <div class="row g-4">
+        
+        <div class="col-3">
+          <div class="product-card">
+            <div class="pc-img-area">
+              <span class="pc-badge">Best Seller</span>
+              <div class="pc-img-placeholder">🎮</div>
+            </div>
+            <div class="pc-body">
+              <div class="pc-sku">GPU-5080-16G</div>
+              <div class="pc-title">NVIDIA GeForce RTX 5080 16GB GDDR7</div>
+              <div class="pc-desc">High-performance flagship GPU. Minimum order 1 unit. Ships in master carton.</div>
+              
+              <div class="pc-price-tier">
+                <div class="tier-row">
+                  <span class="tier-lbl">Tier 1 (1-9 units)</span>
+                  <span class="tier-val">₱68,500</span>
+                </div>
+                <div class="tier-row">
+                  <span class="tier-lbl">Tier 2 (10+ units)</span>
+                  <span class="tier-val bulk">₱65,200</span>
+                </div>
+              </div>
+
+              <div class="pc-actions">
+                <input type="number" class="qty-input" value="1" min="1">
+                <button class="btn-add">Add to Order</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-3">
+          <div class="product-card">
+            <div class="pc-img-area">
+              <div class="pc-img-placeholder">🧠</div>
+            </div>
+            <div class="pc-body">
+              <div class="pc-sku">CPU-14900K-S</div>
+              <div class="pc-title">Intel Core i9-14900K 3.2GHz 36MB</div>
+              <div class="pc-desc">LGA1700 Socket, Unlocked Desktop Processor. Tray packaging for bulk.</div>
+              
+              <div class="pc-price-tier">
+                <div class="tier-row">
+                  <span class="tier-lbl">Tier 1 (1-19 units)</span>
+                  <span class="tier-val">₱24,900</span>
+                </div>
+                <div class="tier-row">
+                  <span class="tier-lbl">Tier 2 (20+ units)</span>
+                  <span class="tier-val bulk">₱23,600</span>
+                </div>
+              </div>
+
+              <div class="pc-actions">
+                <input type="number" class="qty-input" value="10" min="1">
+                <button class="btn-add">Add to Order</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-3">
+          <div class="product-card">
+            <div class="pc-img-area">
+              <span class="pc-badge" style="background: var(--amber); color: #fff;">Low Stock</span>
+              <div class="pc-img-placeholder">💾</div>
+            </div>
+            <div class="pc-body">
+              <div class="pc-sku">RAM-D5-32-6K</div>
+              <div class="pc-title">Crucial DDR5 32GB Dual Kit 6000MHz</div>
+              <div class="pc-desc">2x16GB, CL36, RGB. High demand item, strict allocation applies.</div>
+              
+              <div class="pc-price-tier">
+                <div class="tier-row">
+                  <span class="tier-lbl">Tier 1 (1-24 kits)</span>
+                  <span class="tier-val">₱8,200</span>
+                </div>
+                <div class="tier-row">
+                  <span class="tier-lbl">Tier 2 (25+ kits)</span>
+                  <span class="tier-val bulk">₱7,750</span>
+                </div>
+              </div>
+
+              <div class="pc-actions">
+                <input type="number" class="qty-input" value="5" min="1">
+                <button class="btn-add">Add to Order</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-3">
+          <div class="product-card">
+            <div class="pc-img-area">
+              <div class="pc-img-placeholder">💽</div>
+            </div>
+            <div class="pc-body">
+              <div class="pc-sku">SSD-990P-2TB</div>
+              <div class="pc-title">Samsung 990 Pro NVMe M.2 2TB</div>
+              <div class="pc-desc">PCIe 4.0, speeds up to 7450 MB/s. Ships in packs of 10.</div>
+              
+              <div class="pc-price-tier">
+                <div class="tier-row">
+                  <span class="tier-lbl">Tier 1 (1-49 units)</span>
+                  <span class="tier-val">₱7,800</span>
+                </div>
+                <div class="tier-row">
+                  <span class="tier-lbl">Tier 2 (50+ units)</span>
+                  <span class="tier-val bulk">₱7,350</span>
+                </div>
+              </div>
+
+              <div class="pc-actions">
+                <input type="number" class="qty-input" value="20" min="1">
+                <button class="btn-add">Add to Order</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div></div></div>
+<script src="sc-nav.js"></script>
+</body>
+</html>

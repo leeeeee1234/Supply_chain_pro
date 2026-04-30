@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920">
+<title>SupplyChain Pro — Retailer Dashboard</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #f0f4f8;
+    --surface:   #ffffff;
+    --surface2:  #f5f8fb;
+    --accent:    #0ecfc4;
+    --accent-dk: #035e7b;
+    --accent-lt: #e4faf9;
+    --dark:      #000d16;
+    --text:      #1a2a3a;
+    --muted:     #666e83;
+    --border:    #dde4ef;
+    --red:       #d03030;
+    --red-bg:    #fff2f2;
+    --red-bd:    #f9c8c8;
+    --amber:     #b87000;
+    --amb-bg:    #fffbee;
+    --amb-bd:    #f7df9a;
+    --green:     #097a5e;
+    --grn-bg:    #edfaf5;
+    --sb-w:      230px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html, body {
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+  }
+
+  /* ── LAYOUT ───────────────────────────── */
+  .app { display: flex; width: 1920px; height: 1080px; }
+
+  /* ── SIDEBAR ──────────────────────────── */
+  .sidebar {
+    width: var(--sb-w);
+    min-width: var(--sb-w);
+    background: var(--dark);
+    display: flex;
+    flex-direction: column;
+    height: 1080px;
+  }
+
+  .sb-logo {
+    padding: 22px 22px 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+  .sb-brand { font-size: 14px; font-weight: 700; color: #fff; letter-spacing: 0.1px; }
+  .sb-chip {
+    display: inline-block; font-size: 8px; background: var(--accent);
+    color: var(--dark); border-radius: 3px; padding: 1px 5px;
+    font-weight: 800; letter-spacing: 0.8px; margin-left: 5px;
+    vertical-align: middle; position: relative; top: -1px;
+  }
+  .sb-sub { font-size: 10px; color: #4a5a6e; margin-top: 4px; }
+
+  .sb-nav { flex: 1; padding: 8px 0; overflow-y: auto; }
+  .sb-nav::-webkit-scrollbar { display: none; }
+
+  .nav-grp-lbl {
+    font-size: 9px; color: #3a4e62; letter-spacing: 1.6px;
+    text-transform: uppercase; padding: 14px 22px 5px; font-weight: 600;
+  }
+
+  .nav-link-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 22px; font-size: 12px; color: #6a82a0;
+    text-decoration: none; border-left: 2px solid transparent;
+    transition: all 0.15s; cursor: pointer;
+  }
+  .nav-link-item:hover { color: #b0c4d8; background: rgba(255,255,255,0.04); }
+  .nav-link-item.active {
+    color: #fff; background: rgba(14,207,196,0.1);
+    border-left-color: var(--accent); font-weight: 500;
+  }
+  .nav-link-item svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+  .nav-badge {
+    margin-left: auto; background: var(--accent); color: var(--dark);
+    font-size: 9px; font-weight: 800; border-radius: 10px;
+    padding: 1px 7px; letter-spacing: 0.3px;
+  }
+
+  .sb-user {
+    padding: 16px 22px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    display: flex; align-items: center; gap: 11px;
+  }
+  .user-ava {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: #4a5a6e; display: flex; align-items: center;
+    justify-content: center; font-size: 11px; font-weight: 700;
+    color: #fff; flex-shrink: 0;
+  }
+  .user-name { font-size: 12px; color: #fff; font-weight: 500; }
+  .user-role { font-size: 10px; color: #8aa1ba; margin-top: 1px; }
+
+  /* ── MAIN ─────────────────────────────── */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* ── TOPBAR ───────────────────────────── */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .pg-title { font-size: 16px; font-weight: 700; color: var(--dark); }
+  .pg-sub { font-size: 10px; color: var(--muted); margin-top: 1px; }
+
+  /* HCI – Visibility of System Status */
+  .live-stamp {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 10px; color: var(--muted);
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 5px 13px;
+  }
+  .live-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
+    animation: blink 2s infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .btn-sc-ghost {
+    background: transparent; color: var(--muted);
+    border: 1px solid var(--border); border-radius: 7px;
+    padding: 7px 18px; font-size: 12px; font-family: inherit;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .btn-sc-ghost:hover { border-color: var(--accent-dk); color: var(--accent-dk); }
+
+  .btn-sc-primary {
+    background: var(--accent); color: var(--dark);
+    border: none; border-radius: 7px; padding: 7px 18px;
+    font-size: 12px; font-weight: 700; font-family: inherit;
+    cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px;
+  }
+  .btn-sc-primary:hover { background: var(--accent-dk); color: #fff; }
+
+  /* ── CONTENT ──────────────────────────── */
+  .content {
+    flex: 1; overflow-y: auto; padding: 20px 28px 20px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .content::-webkit-scrollbar { width: 5px; }
+  .content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* ── TILES ── */
+  .tile-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px 22px;
+    position: relative; overflow: hidden;
+  }
+  .tile-card::before {
+    content: ''; position: absolute; top: 0; left: 0;
+    width: 4px; height: 100%; background: var(--t-accent, var(--accent));
+  }
+  .tile-lbl {
+    font-size: 10px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.9px; margin-bottom: 8px; font-weight: 600;
+  }
+  .tile-val { font-size: 32px; font-weight: 700; color: var(--dark); line-height: 1; margin-bottom: 6px; }
+  .tile-delta { font-size: 11px; display: flex; align-items: center; gap: 3px; }
+  .up   { color: var(--green); }
+  .down { color: var(--red); }
+  .warn { color: var(--amber); }
+
+  /* ── CARD ─────────────────────────────── */
+  .sc-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px 22px;
+  }
+  .sc-card-hd { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+  .sc-card-title { font-size: 13px; font-weight: 700; color: var(--dark); }
+  .sc-card-sub { font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+  select.sc-sel {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px; color: var(--muted); font-size: 10px;
+    padding: 5px 10px; font-family: inherit; cursor: pointer;
+  }
+
+  .chart-area { height: 200px; }
+
+  /* ── ALERTS ── */
+  .alert-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 12px; border-radius: 8px;
+    border: 1px solid; margin-bottom: 7px;
+  }
+  .alert-item:last-child { margin-bottom: 0; }
+  .a-err  { background: var(--red-bg);  border-color: var(--red-bd); }
+  .a-info { background: var(--accent-lt); border-color: #abe8e4; }
+  .a-warn { background: var(--amb-bg);  border-color: var(--amb-bd); }
+  .a-ok   { background: var(--grn-bg);  border-color: #c0f2de; }
+
+  .a-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+  .dot-r { background: var(--red); }
+  .dot-t { background: var(--accent); }
+  .dot-a { background: var(--amber); }
+  .dot-g { background: var(--green); }
+
+  .a-text { font-size: 11px; color: var(--text); line-height: 1.5; }
+  .a-time { font-size: 9px; color: var(--muted); margin-top: 2px; }
+
+  /* ── TABLE ── */
+  .table-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
+  }
+  .table-top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 22px 12px; border-bottom: 1px solid var(--border);
+  }
+
+  .sc-search {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 7px; padding: 6px 14px; font-size: 11px;
+    color: var(--text); font-family: inherit; width: 230px;
+  }
+  .sc-search::placeholder { color: var(--muted); }
+
+  .f-btns { display: flex; gap: 5px; }
+  .f-btn {
+    font-size: 10px; color: var(--muted); background: transparent;
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 4px 13px; cursor: pointer; font-family: inherit; transition: all 0.12s;
+  }
+  .f-btn:hover { border-color: var(--accent-dk); color: var(--accent-dk); }
+  .f-btn.on {
+    background: var(--accent-lt); border-color: #abe8e4;
+    color: var(--accent-dk); font-weight: 700;
+  }
+
+  .sc-table { width: 100%; border-collapse: collapse; }
+  .sc-table thead th {
+    font-size: 9.5px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 1px; padding: 9px 20px; text-align: left;
+    background: var(--surface2); border-bottom: 1px solid var(--border);
+    font-weight: 600; white-space: nowrap;
+  }
+  .sc-table tbody td {
+    font-size: 12px; color: var(--text); padding: 11px 20px;
+    border-bottom: 1px solid #edf1f7; vertical-align: middle;
+  }
+  .sc-table tbody tr:last-child td { border-bottom: none; }
+  .sc-table tbody tr:hover td { background: #f8fafd; }
+
+  .mono-lbl { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
+  .cat-lbl  { font-size: 10px; color: var(--muted); }
+  .price-lbl{ font-weight: 600; color: var(--dark); }
+
+  .badge-sc {
+    font-size: 9px; font-weight: 700; border-radius: 5px;
+    padding: 2px 9px; letter-spacing: 0.4px; display: inline-block;
+  }
+  .b-ok  { background: var(--grn-bg); color: var(--green); }
+  .b-low { background: var(--red-bg); color: var(--red); }
+  .b-ord { background: var(--amb-bg); color: var(--amber); }
+  .b-info{ background: var(--accent-lt); color: var(--accent-dk); }
+
+  .table-foot {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 22px; border-top: 1px solid var(--border);
+  }
+  .foot-info { font-size: 10px; color: var(--muted); }
+
+  /* ── FREQUENT PRODUCTS ── */
+  .tp-item { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid #edf1f7; }
+  .tp-item:last-child { border-bottom: none; }
+  .tp-rank { font-size: 11px; font-weight: 700; color: var(--muted); min-width: 18px; }
+  .tp-name { font-size: 11px; color: var(--text); flex: 1; line-height: 1.3; }
+  .tp-cat  { font-size: 10px; color: var(--muted); }
+  .tp-val  { font-size: 11px; font-weight: 600; color: var(--dark); text-align: right; }
+  
+  .btn-sm-add {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 5px; color: var(--accent-dk); font-size: 9px; font-weight: 700;
+    padding: 3px 8px; cursor: pointer; transition: 0.15s;
+  }
+  .btn-sm-add:hover { background: var(--accent); color: var(--dark); border-color: var(--accent); }
+
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ══ SIDEBAR (Retailer View) ═══════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-brand">SupplyChain<span class="sb-chip">PRO</span></div>
+      <div class="sb-sub">B2B Wholesale · Client Portal</div>
+    </div>
+
+    <nav class="sb-nav">
+      <div class="nav-grp-lbl">Procurement</div>
+
+      <a class="nav-link-item active" href="dashboard-client.html" onclick="return false;">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.2" fill="currentColor"/><rect x="9" y="1" width="6" height="6" rx="1.2" fill="currentColor" opacity=".45"/><rect x="1" y="9" width="6" height="6" rx="1.2" fill="currentColor" opacity=".45"/><rect x="9" y="9" width="6" height="6" rx="1.2" fill="currentColor" opacity=".45"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-link-item" href="retailer-product-catalog.html">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M2 3h12v10H2V3z" stroke="currentColor" stroke-width="1.2"/><path d="M2 6h12M6 3v10" stroke="currentColor" stroke-width="1.2"/></svg>
+        Product Catalog
+      </a>
+      <a class="nav-link-item" href="retailer-order-review-submit.html">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M1 1h2l2.5 10h7l2-7h-10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="14" r="1" fill="currentColor"/><circle cx="11" cy="14" r="1" fill="currentColor"/></svg>
+        Order Builder
+        <span class="nav-badge">12</span>
+      </a>
+      
+      <div class="nav-grp-lbl" style="margin-top:4px;">Records</div>
+      <a class="nav-link-item" href="retailer-my-order-list.html">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M2 2h9l2.5 3H2V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><rect x="2" y="5" width="12" height="9" rx="1.2" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 9.5h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        My Purchase Orders
+      </a>
+      <a class="nav-link-item" onclick="alert('Invoices page not yet created')">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="1.5" width="12" height="13" rx="1.4" stroke="currentColor" stroke-width="1.2"/><path d="M5 5.5h6M5 8h6M5 10.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Invoices
+      </a>
+
+      <div class="nav-grp-lbl" style="margin-top:4px;">Account</div>
+      <a class="nav-link-item" onclick="alert('Settings page not yet created')">
+        <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3 3l1.1 1.1M11.9 11.9L13 13M3 13l1.1-1.1M11.9 4.1L13 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Settings
+      </a>
+    </nav>
+
+    <div class="sb-user">
+      <div class="user-ava">TZ</div>
+      <div>
+        <div class="user-name">TechZone PH</div>
+        <div class="user-role">Retail Partner · Tier 1</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ══ MAIN ═══════════════════════════════════════ -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div>
+        <div class="pg-title">Retailer Dashboard</div>
+        <div class="pg-sub">TechZone PH Account &nbsp;·&nbsp; Monday, April 6 2026</div>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <div class="live-stamp">
+          <div class="live-dot"></div>
+          Live &nbsp;·&nbsp; Pricing up to date
+        </div>
+        <button class="btn-sc-ghost" onclick="alert('Price List PDF download would start here')">Price List (PDF)</button>
+        <button class="btn-sc-primary" onclick="window.location.href='retailer-order-review-submit.html'">
+          <svg viewBox="0 0 16 16" width="12" height="12" fill="none"><path d="M1 1h2l2.5 10h7l2-7h-10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Go to Order Builder
+        </button>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content" style="padding-top:28px;">
+
+      <!-- ROW 1: KPI TILES (Retailer Context) -->
+      <div class="row g-3">
+        <div class="col-3">
+          <div class="tile-card" style="--t-accent:#0ecfc4;">
+            <div class="tile-lbl">YTD Procurement Spend</div>
+            <div class="tile-val">₱1.2M</div>
+            <div class="tile-delta up">▲ ₱45k savings (Tier 1 Discount)</div>
+          </div>
+        </div>
+        <div class="col-3">
+          <div class="tile-card" style="--t-accent:#b87000;">
+            <div class="tile-lbl">Pending Purchase Orders</div>
+            <div class="tile-val">2</div>
+            <div class="tile-delta warn">● Awaiting supplier approval</div>
+          </div>
+        </div>
+        <div class="col-3">
+          <div class="tile-card" style="--t-accent:#035e7b;">
+            <div class="tile-lbl">Active Shipments</div>
+            <div class="tile-val">1</div>
+            <div class="tile-delta up" style="color:var(--accent-dk);">🚚 Expected delivery: Tomorrow</div>
+          </div>
+        </div>
+        <div class="col-3">
+          <div class="tile-card" style="--t-accent:#d03030;">
+            <div class="tile-lbl">Unpaid Invoices</div>
+            <div class="tile-val">1</div>
+            <div class="tile-delta down">▼ Due in 3 days (₱85,400)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROW 2: CHART + ALERTS + FREQUENT ITEMS -->
+      <div class="row g-3">
+
+        <!-- SPEND TREND CHART -->
+        <div class="col-5">
+          <div class="sc-card h-100">
+            <div class="sc-card-hd">
+              <div>
+                <div class="sc-card-title">Procurement History</div>
+                <div class="sc-card-sub">
+                  <span style="color:#0ecfc4;font-weight:700;">━</span> Spend Amount &nbsp;
+                  <span style="color:#035e7b;font-weight:700;">━</span> Orders Placed &nbsp;·&nbsp; 2026
+                </div>
+              </div>
+              <div class="d-flex gap-2 align-items-center">
+                <select class="sc-sel">
+                  <option>Last 6 Months</option>
+                  <option>Year to Date</option>
+                </select>
+              </div>
+            </div>
+            <div class="chart-area">
+              <canvas id="spendChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- FREQUENTLY ORDERED -->
+        <div class="col-4">
+          <div class="sc-card h-100">
+            <div class="sc-card-hd">
+              <div>
+                <div class="sc-card-title">Frequently Bought SKUs</div>
+                <div class="sc-card-sub">Quick add based on your order history</div>
+              </div>
+            </div>
+            <div class="tp-item">
+              <div class="tp-rank">#1</div>
+              <div><div class="tp-name">Samsung 990 Pro NVMe 2TB</div><div class="tp-cat">Storage · Tier 1: ₱7,350</div></div>
+              <button class="btn-sm-add">+ Add</button>
+            </div>
+            <div class="tp-item">
+              <div class="tp-rank">#2</div>
+              <div><div class="tp-name">Crucial DDR5 32GB 6000MHz</div><div class="tp-cat">Memory · Tier 1: ₱7,750</div></div>
+              <button class="btn-sm-add">+ Add</button>
+            </div>
+            <div class="tp-item">
+              <div class="tp-rank">#3</div>
+              <div><div class="tp-name">Corsair RM1000x 80+ Gold</div><div class="tp-cat">PSU · Tier 1: ₱8,900</div></div>
+              <button class="btn-sm-add">+ Add</button>
+            </div>
+            <div class="tp-item">
+              <div class="tp-rank">#4</div>
+              <div><div class="tp-name">Intel Core i9-14900K</div><div class="tp-cat">CPU · Tier 1: ₱23,600</div></div>
+              <button class="btn-sm-add">+ Add</button>
+            </div>
+            <div class="tp-item" style="border-bottom:none;">
+              <div class="tp-rank">#5</div>
+              <div><div class="tp-name">ASUS ROG Maximus Z790</div><div class="tp-cat">Motherboard · Tier 1: ₱30,400</div></div>
+              <button class="btn-sm-add">+ Add</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ORDER STATUS ALERTS -->
+        <div class="col-3">
+          <div class="sc-card h-100">
+            <div class="sc-card-hd">
+              <div>
+                <div class="sc-card-title">Order Updates</div>
+                <div class="sc-card-sub">Recent status changes</div>
+              </div>
+            </div>
+            
+            <div class="alert-item a-ok">
+              <div class="a-dot dot-g"></div>
+              <div>
+                <div class="a-text"><strong>PO-2026-042 Approved</strong> — Supplier confirmed your order of 45 items.</div>
+                <div class="a-time">1 hour ago</div>
+              </div>
+            </div>
+            <div class="alert-item a-info">
+              <div class="a-dot dot-t"></div>
+              <div>
+                <div class="a-text"><strong>Shipment Dispatched</strong> — Order PO-2026-039 is out for delivery.</div>
+                <div class="a-time">Yesterday, 4:00 PM</div>
+              </div>
+            </div>
+            <div class="alert-item a-err">
+              <div class="a-dot dot-r"></div>
+              <div>
+                <div class="a-text"><strong>Action Required</strong> — Invoice INV-2026-088 is due on April 9.</div>
+                <div class="a-time">2 days ago</div>
+              </div>
+            </div>
+            <div class="alert-item a-warn">
+              <div class="a-dot dot-a"></div>
+              <div>
+                <div class="a-text">Item "NVIDIA RTX 5080" in your saved cart has limited supplier stock.</div>
+                <div class="a-time">3 days ago</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROW 3: RECENT ORDERS TABLE (Client View) -->
+      <div class="row g-3">
+        <div class="col-12">
+          <div class="table-card">
+            <div class="table-top">
+              <div>
+                <div class="sc-card-title">Recent Purchase Orders</div>
+                <div class="sc-card-sub" style="margin-top:2px;">Showing your latest submitted orders</div>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <div class="f-btns">
+                  <button class="f-btn on">All</button>
+                  <button class="f-btn">Pending</button>
+                  <button class="f-btn">Approved</button>
+                  <button class="f-btn">Shipped</button>
+                  <button class="f-btn">Delivered</button>
+                </div>
+                <input class="sc-search" placeholder="Search PO Number...">
+              </div>
+            </div>
+
+            <table class="sc-table">
+              <thead>
+                <tr>
+                  <th>PO Number</th>
+                  <th>Date Submitted</th>
+                  <th>Total Units</th>
+                  <th>Total Amount</th>
+                  <th>Status</th>
+                  <th>Est. Delivery</th>
+                  <th>Payment</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="mono-lbl" style="font-weight:600;color:var(--dark);">PO-2026-044</span></td>
+                  <td>Apr 6, 2026</td>
+                  <td>12 units</td>
+                  <td><span class="price-lbl">₱284,000</span></td>
+                  <td><span class="badge-sc b-ord">PENDING</span></td>
+                  <td class="text-muted" style="font-size:11px;">TBD</td>
+                  <td><span class="badge-sc" style="background:#e8edf5;color:#666e83;">UNBILLED</span></td>
+                  <td><button class="f-btn" style="font-size:9.5px;">View Details</button></td>
+                </tr>
+                <tr>
+                  <td><span class="mono-lbl" style="font-weight:600;color:var(--dark);">PO-2026-042</span></td>
+                  <td>Apr 5, 2026</td>
+                  <td>45 units</td>
+                  <td><span class="price-lbl">₱112,500</span></td>
+                  <td><span class="badge-sc b-info">APPROVED</span></td>
+                  <td class="text-muted" style="font-size:11px;">Apr 9, 2026</td>
+                  <td><span class="badge-sc" style="background:#e8edf5;color:#666e83;">UNBILLED</span></td>
+                  <td><button class="f-btn" style="font-size:9.5px;">View Details</button></td>
+                </tr>
+                <tr>
+                  <td><span class="mono-lbl" style="font-weight:600;color:var(--dark);">PO-2026-039</span></td>
+                  <td>Apr 2, 2026</td>
+                  <td>20 units</td>
+                  <td><span class="price-lbl">₱85,400</span></td>
+                  <td><span class="badge-sc" style="background:#e0f2ff;color:#0066b3;">SHIPPED</span></td>
+                  <td class="text-muted" style="font-size:11px;color:var(--dark)!important;font-weight:600;">Tomorrow</td>
+                  <td><span class="badge-sc b-low">DUE APR 9</span></td>
+                  <td><button class="f-btn" style="font-size:9.5px;">Track Order</button></td>
+                </tr>
+                <tr>
+                  <td><span class="mono-lbl" style="font-weight:600;color:var(--dark);">PO-2026-028</span></td>
+                  <td>Mar 15, 2026</td>
+                  <td>110 units</td>
+                  <td><span class="price-lbl">₱420,000</span></td>
+                  <td><span class="badge-sc b-ok">DELIVERED</span></td>
+                  <td class="text-muted" style="font-size:11px;">Mar 18, 2026</td>
+                  <td><span class="badge-sc b-ok">PAID</span></td>
+                  <td><button class="f-btn" style="font-size:9.5px;">Reorder</button></td>
+                </tr>
+                <tr>
+                  <td><span class="mono-lbl" style="font-weight:600;color:var(--dark);">PO-2026-015</span></td>
+                  <td>Feb 28, 2026</td>
+                  <td>50 units</td>
+                  <td><span class="price-lbl">₱195,000</span></td>
+                  <td><span class="badge-sc b-ok">DELIVERED</span></td>
+                  <td class="text-muted" style="font-size:11px;">Mar 3, 2026</td>
+                  <td><span class="badge-sc b-ok">PAID</span></td>
+                  <td><button class="f-btn" style="font-size:9.5px;">Reorder</button></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="table-foot">
+              <span class="foot-info">Showing 5 of 32 past orders &nbsp;·&nbsp; Page 1 of 7</span>
+              <div class="f-btns">
+                <button class="f-btn">← Prev</button>
+                <button class="f-btn on">1</button>
+                <button class="f-btn">2</button>
+                <button class="f-btn">3</button>
+                <button class="f-btn">…</button>
+                <button class="f-btn">7</button>
+                <button class="f-btn">Next →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const ctx = document.getElementById('spendChart').getContext('2d');
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: ['Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr'],
+    datasets: [
+      {
+        label: 'Spend Amount (₱100k)',
+        data: [2.5, 3.8, 1.9, 2.5, 4.2, 3.9],
+        borderColor: '#0ecfc4',
+        backgroundColor: 'rgba(14,207,196,0.08)',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#0ecfc4',
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        tension: 0.4,
+        fill: true,
+        yAxisID: 'y'
+      },
+      {
+        label: 'Orders Placed',
+        data: [2, 4, 2, 3, 5, 4],
+        borderColor: '#035e7b',
+        backgroundColor: 'rgba(3,94,123,0.06)',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#035e7b',
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        tension: 0.4,
+        fill: true,
+        yAxisID: 'y'
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#fff',
+        borderColor: '#dde4ef',
+        borderWidth: 1,
+        titleColor: '#1a2a3a',
+        bodyColor: '#666e83',
+        padding: 12,
+        titleFont: { size: 11 },
+        bodyFont: { size: 10 }
+      }
+    },
+    scales: {
+      x: {
+        grid: { color: 'rgba(220,228,240,0.7)', lineWidth: 1 },
+        ticks: { color: '#666e83', font: { size: 10 } },
+        border: { display: false }
+      },
+      y: {
+        grid: { color: 'rgba(220,228,240,0.7)', lineWidth: 1 },
+        ticks: { color: '#666e83', font: { size: 10 } },
+        border: { display: false }
+      }
+    }
+  }
+});
+
+// Filter button toggle
+document.querySelectorAll('.f-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const group = this.closest('.f-btns');
+    if (group) {
+      group.querySelectorAll('.f-btn').forEach(b => b.classList.remove('on'));
+      this.classList.add('on');
+    }
+  });
+});
+
+// Connect Add buttons for frequently bought items
+document.addEventListener('DOMContentLoaded', function() {
+  const addButtons = document.querySelectorAll('.btn-sm-add');
+  addButtons.forEach((btn, index) => {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const productName = this.closest('.tp-item').querySelector('.tp-name').textContent;
+      alert('Added "' + productName + '" to your order builder. Redirecting...');
+      // In a real app, this would add to cart and redirect to order builder
+      setTimeout(() => {
+        window.location.href = 'retailer-order-review-submit.html';
+      }, 300);
+    });
+  });
+
+  // Connect action buttons in purchase orders table
+  const tableButtons = document.querySelectorAll('.sc-table tbody .f-btn');
+  tableButtons.forEach((btn) => {
+    if (btn.textContent.includes('View Details')) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const poNumber = this.closest('tr').querySelector('.mono-lbl').textContent;
+        alert('Opening details for ' + poNumber);
+        window.location.href = 'retailer-order-detail-view.html?po=' + poNumber;
+      });
+    } else if (btn.textContent.includes('Track Order')) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const poNumber = this.closest('tr').querySelector('.mono-lbl').textContent;
+        alert('Tracking order ' + poNumber);
+        window.location.href = 'retailer-order-detail-view.html?po=' + poNumber + '&track=true';
+      });
+    } else if (btn.textContent.includes('Reorder')) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const poNumber = this.closest('tr').querySelector('.mono-lbl').textContent;
+        alert('Reordering from ' + poNumber);
+        window.location.href = 'retailer-order-review-submit.html?reorder=' + poNumber;
+      });
+    }
+  });
+});
+</script>
+<script src="sc-nav.js"></script>
+</body>
+</html>

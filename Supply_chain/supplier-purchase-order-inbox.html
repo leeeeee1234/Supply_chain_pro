@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920">
+<title>SupplyChain Pro — Purchase Order Inbox</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #f0f4f8;
+    --surface:   #ffffff;
+    --surface2:  #f5f8fb;
+    --accent:    #0ecfc4;
+    --accent-dk: #035e7b;
+    --accent-lt: #e4faf9;
+    --dark:      #000d16;
+    --dark-card: #0a1724;
+    --text:      #1a2a3a;
+    --muted:     #666e83;
+    --border:    #dde4ef;
+    --red:       #d03030;
+    --red-bg:    #fff2f2;
+    --red-bd:    #f9c8c8;
+    --amber:     #b87000;
+    --amb-bg:    #fffbee;
+    --amb-bd:    #f7df9a;
+    --green:     #097a5e;
+    --grn-bg:    #edfaf5;
+    --sb-w:      230px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html, body {
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+  }
+
+  /* ── LAYOUT & SIDEBAR (Supplier Admin) ── */
+  .app { display: flex; width: 1920px; height: 1080px; }
+
+  .sidebar {
+    width: var(--sb-w); min-width: var(--sb-w); background: var(--dark);
+    display: flex; flex-direction: column; height: 1080px;
+  }
+  .sb-logo { padding: 22px 22px 18px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+  .sb-brand { font-size: 14px; font-weight: 700; color: #fff; letter-spacing: 0.1px; }
+  .sb-chip {
+    display: inline-block; font-size: 8px; background: var(--accent); color: var(--dark);
+    border-radius: 3px; padding: 1px 5px; font-weight: 800; letter-spacing: 0.8px; margin-left: 5px;
+    vertical-align: middle; position: relative; top: -1px;
+  }
+  .sb-sub { font-size: 10px; color: #4a5a6e; margin-top: 4px; }
+
+  .sb-nav { flex: 1; padding: 8px 0; overflow-y: auto; }
+  .nav-grp-lbl {
+    font-size: 9px; color: #3a4e62; letter-spacing: 1.6px; text-transform: uppercase;
+    padding: 14px 22px 5px; font-weight: 600;
+  }
+  .nav-link-item {
+    display: flex; align-items: center; gap: 10px; padding: 9px 22px; font-size: 12px;
+    color: #6a82a0; text-decoration: none; border-left: 2px solid transparent; transition: all 0.15s; cursor: pointer;
+  }
+  .nav-link-item:hover { color: #b0c4d8; background: rgba(255,255,255,0.04); }
+  .nav-link-item.active {
+    color: #fff; background: rgba(14,207,196,0.1); border-left-color: var(--accent); font-weight: 500;
+  }
+  .nav-link-item svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .nav-badge {
+    margin-left: auto; background: var(--amber); color: #fff; font-size: 9px; font-weight: 800;
+    border-radius: 10px; padding: 1px 7px; letter-spacing: 0.3px;
+  }
+
+  .sb-user {
+    padding: 16px 22px; border-top: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; gap: 11px;
+  }
+  .user-ava {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--accent-dk);
+    display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;
+    color: var(--accent); flex-shrink: 0;
+  }
+  .user-name { font-size: 12px; color: #fff; font-weight: 500; }
+  .user-role { font-size: 10px; color: #4a5a6e; margin-top: 1px; }
+
+  /* ── MAIN & TOPBAR ────────────────────── */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  .topbar {
+    background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 28px; height: 60px;
+    display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+  }
+  .pg-title { font-size: 16px; font-weight: 700; color: var(--dark); }
+  .pg-sub { font-size: 10px; color: var(--muted); margin-top: 1px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .btn-sc-primary {
+    background: var(--accent); color: var(--dark); border: none; border-radius: 7px;
+    padding: 7px 18px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-sc-primary:hover { background: var(--accent-dk); color: #fff; }
+
+  /* ── CONTENT AREA ─────────────────────── */
+  .content { flex: 1; overflow-y: auto; padding: 30px 40px; display: flex; flex-direction: column; max-width: 1200px; margin: 0 auto; width: 100%; }
+  .content::-webkit-scrollbar { width: 6px; }
+  .content::-webkit-scrollbar-thumb { background: #cbd4e1; border-radius: 4px; }
+
+  /* ── INBOX HEADER & KPIs ──────────────── */
+  .inbox-headline {
+    font-size: 36px; font-weight: 800; color: var(--dark); text-transform: uppercase;
+    letter-spacing: -1px; margin-bottom: 30px; display: flex; align-items: center; gap: 12px;
+  }
+  .inbox-highlight { color: var(--accent); }
+
+  .stat-card {
+    background: var(--dark-card); border-radius: 16px; padding: 30px 20px;
+    text-align: center; color: #fff; position: relative; overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08); transition: transform 0.2s;
+  }
+  .stat-card:hover { transform: translateY(-4px); }
+  .stat-card::after {
+    content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 6px; background: var(--c-accent);
+  }
+  
+  .stat-card.c-pending { --c-accent: var(--amber); }
+  .stat-card.c-approved { --c-accent: var(--green); }
+  .stat-card.c-rejected { --c-accent: var(--red); }
+
+  .stat-lbl { font-size: 12px; font-weight: 600; color: #8ba3b8; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; }
+  .stat-val { font-size: 56px; font-weight: 800; line-height: 1; }
+
+  /* ── FILTER TABS ──────────────────────── */
+  .inbox-filters {
+    display: flex; align-items: center; justify-content: space-between;
+    margin: 40px 0 20px; border-bottom: 2px solid var(--border); padding-bottom: 16px;
+  }
+  .filter-lbl { font-size: 14px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  
+  .f-btns { display: flex; gap: 8px; }
+  .f-btn {
+    font-size: 11px; font-weight: 600; color: var(--muted); background: var(--surface);
+    border: 1px solid var(--border); border-radius: 20px; padding: 6px 18px; cursor: pointer; transition: all 0.15s;
+  }
+  .f-btn:hover { border-color: var(--dark); color: var(--dark); }
+  .f-btn.on { background: var(--dark); border-color: var(--dark); color: #fff; }
+
+  /* ── PO CARDS (Dark Theme from Image) ─── */
+  .po-list { display: flex; flex-direction: column; gap: 16px; }
+
+  .po-card {
+    background: var(--dark-card); border-radius: 12px; padding: 20px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+    color: #fff; border: 1px solid rgba(255,255,255,0.05); transition: all 0.2s;
+  }
+  .po-card:hover { border-color: rgba(255,255,255,0.15); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+
+  .po-info { flex: 1; }
+  .po-id { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--accent); margin-bottom: 4px; }
+  .po-retailer { font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .po-date { font-size: 12px; color: #8ba3b8; }
+
+  .po-meta { flex: 1; display: flex; flex-direction: column; align-items: center; border-left: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1); padding: 0 20px; }
+  
+  .status-outline {
+    border: 1px solid var(--s-color); border-radius: 6px; padding: 6px 30px;
+    font-size: 12px; font-weight: 600; color: var(--s-color); margin-bottom: 8px; width: 160px; text-align: center;
+  }
+  .status-outline.s-pending { --s-color: var(--amber); }
+  .status-outline.s-approved { --s-color: var(--green); }
+  .status-outline.s-rejected { --s-color: var(--red); }
+
+  .po-deliv { font-size: 11px; color: #8ba3b8; text-align: center; line-height: 1.4; }
+  .po-deliv span { color: #fff; font-weight: 500; }
+
+  .po-actions { flex: 1; display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
+  
+  .btn-action {
+    width: 38px; height: 38px; border-radius: 50%; border: none;
+    display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.15s;
+  }
+  .btn-action:hover { transform: scale(1.1); }
+  .btn-approve { background: var(--green); color: #fff; }
+  .btn-reject { background: var(--red); color: #fff; }
+  
+  .btn-review {
+    background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #fff;
+    border-radius: 6px; padding: 8px 16px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.15s;
+  }
+  .btn-review:hover { background: rgba(255,255,255,0.1); border-color: #fff; }
+
+  .reason-txt { font-size: 12px; color: var(--red); text-decoration: underline; cursor: pointer; font-weight: 600; margin-right: 20px;}
+
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-brand">SupplyChain<span class="sb-chip">PRO</span></div>
+      <div class="sb-sub">B2B Wholesale · PC Components</div>
+    </div>
+
+    <nav class="sb-nav">
+      <div class="nav-grp-lbl">Main</div>
+      <a class="nav-link-item">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.2" fill="currentColor"/><rect x="9" y="1" width="6" height="6" rx="1.2" fill="currentColor" opacity=".45"/><rect x="1" y="9" width="6" height="6" rx="1.2" fill="currentColor" opacity=".45"/><rect x="9" y="9" width="6" height="6" rx="1.2" fill="currentColor" opacity=".45"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-link-item">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3" width="13" height="10" rx="1.4" stroke="currentColor" stroke-width="1.2"/><path d="M5 8h6M8 5v6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Inventory
+      </a>
+      <a class="nav-link-item active">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M2 2h9l2.5 3H2V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><rect x="2" y="5" width="12" height="9" rx="1.2" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 9.5h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        PO Inbox
+        <span class="nav-badge">4</span>
+      </a>
+      <a class="nav-link-item">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="1.5" width="12" height="13" rx="1.4" stroke="currentColor" stroke-width="1.2"/><path d="M5 5.5h6M5 8h6M5 10.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Invoices
+      </a>
+      <a class="nav-link-item">
+        <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.2"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Retailers
+      </a>
+    </nav>
+
+    <div class="sb-user">
+      <div class="user-ava">JD</div>
+      <div>
+        <div class="user-name">Juan Dela Cruz</div>
+        <div class="user-role">Supplier · Admin</div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+
+    <div class="topbar">
+      <div>
+        <div class="pg-sub">Supplier / Purchase Orders</div>
+      </div>
+      <div class="d-flex align-items-center gap-3">
+        <button class="btn-sc-primary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          Export PO Log
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="inbox-headline">
+        Purchase Order <span class="inbox-highlight">Inbox</span>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-4">
+          <div class="stat-card c-pending">
+            <div class="stat-lbl">Pending</div>
+            <div class="stat-val">4</div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="stat-card c-approved">
+            <div class="stat-lbl">Approved</div>
+            <div class="stat-val">8</div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="stat-card c-rejected">
+            <div class="stat-lbl">Rejected</div>
+            <div class="stat-val">1</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="inbox-filters">
+        <span class="filter-lbl">All Orders</span>
+        <div class="f-btns">
+          <button class="f-btn on">All</button>
+          <button class="f-btn">Pending</button>
+          <button class="f-btn">Approved</button>
+          <button class="f-btn">Rejected</button>
+        </div>
+      </div>
+
+      <div class="po-list">
+        
+        <div class="po-card">
+          <div class="po-info">
+            <div class="po-id">PO-2026-041</div>
+            <div class="po-retailer">TechZone PH</div>
+            <div class="po-date">Submitted: April 6, 2026</div>
+          </div>
+          <div class="po-meta">
+            <div class="status-outline s-pending">Pending</div>
+            <div class="po-deliv">Requested delivery:<br><span>April 20, 2026</span></div>
+          </div>
+          <div class="po-actions">
+            <button class="btn-review">Review Order</button>
+            <button class="btn-action btn-approve" title="Approve">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </button>
+            <button class="btn-action btn-reject" title="Reject">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="po-card">
+          <div class="po-info">
+            <div class="po-id">PO-2026-038</div>
+            <div class="po-retailer">Computer Mart</div>
+            <div class="po-date">Submitted: April 5, 2026</div>
+          </div>
+          <div class="po-meta">
+            <div class="status-outline s-pending">Pending</div>
+            <div class="po-deliv">Requested delivery:<br><span>April 18, 2026</span></div>
+          </div>
+          <div class="po-actions">
+            <button class="btn-review">Review Order</button>
+            <button class="btn-action btn-approve" title="Approve">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </button>
+            <button class="btn-action btn-reject" title="Reject">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="po-card">
+          <div class="po-info">
+            <div class="po-id">PO-2026-037</div>
+            <div class="po-retailer">Metrotech</div>
+            <div class="po-date">Submitted: April 4, 2026</div>
+          </div>
+          <div class="po-meta">
+            <div class="status-outline s-rejected">Rejected</div>
+            <div class="po-deliv">Requested delivery:<br><span>April 15, 2026</span></div>
+          </div>
+          <div class="po-actions">
+            <span class="reason-txt">View Reason</span>
+            <button class="btn-review">View Details</button>
+          </div>
+        </div>
+
+        <div class="po-card">
+          <div class="po-info">
+            <div class="po-id">PO-2026-035</div>
+            <div class="po-retailer">CyberSystems</div>
+            <div class="po-date">Submitted: April 3, 2026</div>
+          </div>
+          <div class="po-meta">
+            <div class="status-outline s-approved">Approved</div>
+            <div class="po-deliv">Estimated Dispatch:<br><span>April 8, 2026</span></div>
+          </div>
+          <div class="po-actions">
+            <button class="btn-review">View Invoice</button>
+          </div>
+        </div>
+
+      </div>
+
+    </div></div></div>
+<script src="sc-nav.js"></script>
+</body>
+</html>

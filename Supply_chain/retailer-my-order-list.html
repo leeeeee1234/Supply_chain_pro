@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920">
+<title>SupplyChain Pro — My Orders (Retailer)</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #f0f4f8;
+    --surface:   #ffffff;
+    --surface2:  #f5f8fb;
+    --accent:    #0ecfc4;
+    --accent-dk: #035e7b;
+    --accent-lt: #e4faf9;
+    --dark:      #000d16;
+    --text:      #1a2a3a;
+    --muted:     #666e83;
+    --border:    #dde4ef;
+    --red:       #d03030;
+    --red-bg:    #fff2f2;
+    --red-bd:    #f9c8c8;
+    --amber:     #b87000;
+    --amb-bg:    #fffbee;
+    --amb-bd:    #f7df9a;
+    --green:     #097a5e;
+    --grn-bg:    #edfaf5;
+    --sb-w:      230px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html, body {
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+  }
+
+  /* ── LAYOUT & SIDEBAR ─────────────────── */
+  .app { display: flex; width: 1920px; height: 1080px; }
+
+  .sidebar {
+    width: var(--sb-w); min-width: var(--sb-w); background: var(--dark);
+    display: flex; flex-direction: column; height: 1080px;
+  }
+  .sb-logo { padding: 22px 22px 18px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+  .sb-brand { font-size: 14px; font-weight: 700; color: #fff; letter-spacing: 0.1px; }
+  .sb-chip {
+    display: inline-block; font-size: 8px; background: var(--accent); color: var(--dark);
+    border-radius: 3px; padding: 1px 5px; font-weight: 800; letter-spacing: 0.8px; margin-left: 5px;
+    vertical-align: middle; position: relative; top: -1px;
+  }
+  .sb-sub { font-size: 10px; color: #4a5a6e; margin-top: 4px; }
+
+  .sb-nav { flex: 1; padding: 8px 0; overflow-y: auto; }
+  .nav-grp-lbl {
+    font-size: 9px; color: #3a4e62; letter-spacing: 1.6px; text-transform: uppercase;
+    padding: 14px 22px 5px; font-weight: 600;
+  }
+  .nav-link-item {
+    display: flex; align-items: center; gap: 10px; padding: 9px 22px; font-size: 12px;
+    color: #6a82a0; text-decoration: none; border-left: 2px solid transparent; transition: all 0.15s; cursor: pointer;
+  }
+  .nav-link-item:hover { color: #b0c4d8; background: rgba(255,255,255,0.04); }
+  .nav-link-item.active {
+    color: #fff; background: rgba(14,207,196,0.1); border-left-color: var(--accent); font-weight: 500;
+  }
+  .nav-link-item svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+  .sb-user {
+    padding: 16px 22px; border-top: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; gap: 11px;
+  }
+  .user-ava {
+    width: 34px; height: 34px; border-radius: 50%; background: #2a3a4a;
+    display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;
+    color: #fff; flex-shrink: 0;
+  }
+  .user-name { font-size: 12px; color: #fff; font-weight: 500; }
+  .user-role { font-size: 10px; color: #4a5a6e; margin-top: 1px; }
+
+  /* ── MAIN & TOPBAR ────────────────────── */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  .topbar {
+    background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 28px; height: 60px;
+    display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+  }
+  .pg-title { font-size: 16px; font-weight: 700; color: var(--dark); }
+  .pg-sub { font-size: 10px; color: var(--muted); margin-top: 1px; }
+
+  .btn-sc-primary {
+    background: var(--accent); color: var(--dark); border: none; border-radius: 7px;
+    padding: 7px 18px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-sc-primary:hover { background: var(--accent-dk); color: #fff; }
+
+  /* ── CONTENT AREA ─────────────────────── */
+  .content { flex: 1; overflow-y: auto; padding: 40px 50px; }
+  .content::-webkit-scrollbar { width: 6px; }
+  .content::-webkit-scrollbar-thumb { background: #cbd4e1; border-radius: 4px; }
+
+  /* ── TYPOGRAPHY HEADERS ───────────────── */
+  .section-headline {
+    font-size: 22px; font-weight: 800; color: var(--dark); text-transform: uppercase;
+    letter-spacing: 1px; margin-bottom: 24px;
+  }
+  .center-headline {
+    font-size: 20px; font-weight: 800; color: var(--dark); text-transform: uppercase;
+    letter-spacing: 1px; text-align: center; margin-bottom: 24px; line-height: 1.3;
+  }
+
+  /* ── LEFT COLUMN: ORDER CARDS ─────────── */
+  .order-card {
+    background: var(--surface); border: 2.5px solid var(--dark); border-radius: 20px;
+    padding: 24px; margin-bottom: 24px; transition: all 0.2s;
+  }
+  .order-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.06); transform: translateY(-2px); }
+
+  .oc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+  
+  .oc-item-lbl { font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 4px; }
+  .oc-item-val { font-size: 18px; font-weight: 800; color: var(--dark); }
+  
+  .oc-status-box { text-align: right; }
+  .oc-status-lbl { font-size: 13px; font-weight: 700; color: var(--dark); margin-bottom: 4px; }
+  .oc-status-val { font-size: 18px; font-weight: 800; }
+  .status-delivered { color: #8ba3b8; } /* Matched grey color from wireframe */
+  .status-transit { color: var(--amber); }
+
+  .oc-desc-box { margin-bottom: 20px; }
+  .oc-desc-lbl { font-size: 13px; font-weight: 800; color: var(--dark); margin-bottom: 4px; }
+  .oc-desc-val { font-size: 14px; color: #8ba3b8; line-height: 1.5; max-width: 80%; }
+
+  .oc-actions { display: flex; justify-content: flex-end; gap: 12px; }
+  
+  /* Pill Buttons matched to wireframe */
+  .btn-outline-pill {
+    background: transparent; border: 2px solid var(--dark); color: var(--dark);
+    border-radius: 30px; padding: 8px 20px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s;
+  }
+  .btn-outline-pill:hover { background: var(--surface2); }
+  
+  .btn-solid-pill {
+    background: var(--accent-dk); color: #fff; border: 2px solid var(--accent-dk);
+    border-radius: 30px; padding: 8px 20px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s;
+  }
+  .btn-solid-pill:hover { background: #02485e; border-color: #02485e; }
+
+  /* Horizontal Separator */
+  .h-separator {
+    height: 2px; background-color: #8ba3b8; opacity: 0.5; margin-bottom: 24px; border-radius: 2px;
+  }
+
+  /* ── VERTICAL DIVIDER ─────────────────── */
+  .v-divider {
+    width: 2.5px; background-color: #8ba3b8; opacity: 0.5; height: 100%; min-height: 600px; margin: 0 auto; border-radius: 2px;
+  }
+
+  /* ── RIGHT COLUMN: SUMMARY BLOCK ──────── */
+  .summary-dark-block {
+    background: var(--dark); color: #fff; border-radius: 24px; padding: 40px 32px;
+    height: 100%; min-height: 600px; box-shadow: 0 12px 30px rgba(0, 13, 22, 0.15);
+  }
+
+  /* Placeholder content for the blank dark box in wireframe */
+  .sd-stat-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding: 20px 0; }
+  .sd-stat-row:first-child { padding-top: 0; }
+  .sd-stat-lbl { font-size: 14px; font-weight: 600; color: #8ba3b8; text-transform: uppercase; letter-spacing: 1px; }
+  .sd-stat-val { font-size: 24px; font-weight: 800; color: #fff; }
+
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-brand">SupplyChain<span class="sb-chip">PRO</span></div>
+      <div class="sb-sub">B2B Wholesale · Client Portal</div>
+    </div>
+
+    <nav class="sb-nav">
+      <div class="nav-grp-lbl">Marketplace</div>
+      <a class="nav-link-item">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.2" fill="currentColor"/><rect x="9" y="1" width="6" height="6" rx="1.2" fill="currentColor" opacity=".45"/><rect x="1" y="9" width="6" height="6" rx="1.2" fill="currentColor" opacity=".45"/><rect x="9" y="9" width="6" height="6" rx="1.2" fill="currentColor" opacity=".45"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-link-item">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3" width="13" height="10" rx="1.4" stroke="currentColor" stroke-width="1.2"/><path d="M5 8h6M8 5v6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Product Catalog
+      </a>
+      
+      <div class="nav-grp-lbl" style="margin-top:4px;">Purchasing</div>
+      <a class="nav-link-item">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M3 3h10l-1 6H4L3 3z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="5" cy="13" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="11" cy="13" r="1.5" stroke="currentColor" stroke-width="1.2"/></svg>
+        Order Builder
+      </a>
+      <a class="nav-link-item active">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M2 2h9l2.5 3H2V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><rect x="2" y="5" width="12" height="9" rx="1.2" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 9.5h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        My Orders
+      </a>
+      <a class="nav-link-item">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="1.5" width="12" height="13" rx="1.4" stroke="currentColor" stroke-width="1.2"/><path d="M5 5.5h6M5 8h6M5 10.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Invoices
+      </a>
+
+      <div class="nav-grp-lbl" style="margin-top:4px;">Account</div>
+      <a class="nav-link-item">
+        <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3 3l1.1 1.1M11.9 11.9L13 13M3 13l1.1-1.1M11.9 4.1L13 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Settings
+      </a>
+    </nav>
+
+    <div class="sb-user">
+      <div class="user-ava">TZ</div>
+      <div>
+        <div class="user-name">TechZone PH</div>
+        <div class="user-role">Retailer · Client</div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+
+    <div class="topbar">
+      <div>
+        <div class="pg-title">My Orders</div>
+        <div class="pg-sub">Track and manage your wholesale purchase history.</div>
+      </div>
+      <div class="d-flex align-items-center gap-3">
+        <button class="btn-sc-primary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          Export History
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="row h-100">
+        
+        <div class="col-7 pe-4">
+          <div class="section-headline">MY ORDERS</div>
+
+          <div class="order-card">
+            <div class="oc-top">
+              <div>
+                <div class="oc-item-lbl">Item</div>
+                <div class="oc-item-val">Purchase Order: PO-2026-035</div>
+              </div>
+              <div class="oc-status-box">
+                <div class="oc-status-lbl">Status:</div>
+                <div class="oc-status-val status-delivered">Delivered</div>
+              </div>
+            </div>
+            
+            <div class="oc-desc-box">
+              <div class="oc-desc-lbl">Description</div>
+              <div class="oc-desc-val">
+                Completed on April 2, 2026. Contains 50x Crucial DDR5 32GB Kits, 100x Corsair RM1000x PSUs. Shipped via Standard Freight.
+              </div>
+            </div>
+
+            <div class="oc-actions">
+              <button class="btn-outline-pill">Report a Problem</button>
+              <button class="btn-solid-pill">Order Details</button>
+            </div>
+          </div>
+
+          <div class="h-separator"></div>
+
+          <div class="order-card">
+            <div class="oc-top">
+              <div>
+                <div class="oc-item-lbl">Item</div>
+                <div class="oc-item-val">Purchase Order: PO-2026-032</div>
+              </div>
+              <div class="oc-status-box">
+                <div class="oc-status-lbl">Status:</div>
+                <div class="oc-status-val status-delivered">Delivered</div>
+              </div>
+            </div>
+            
+            <div class="oc-desc-box">
+              <div class="oc-desc-lbl">Description</div>
+              <div class="oc-desc-val">
+                Completed on March 15, 2026. Contains 20x ASUS ROG Maximus Z790 Motherboards, 40x Samsung 990 Pro 2TB SSDs.
+              </div>
+            </div>
+
+            <div class="oc-actions">
+              <button class="btn-outline-pill">Report a Problem</button>
+              <button class="btn-solid-pill">Order Details</button>
+            </div>
+          </div>
+
+          <div class="h-separator"></div>
+
+          <div class="order-card">
+            <div class="oc-top">
+              <div>
+                <div class="oc-item-lbl">Item</div>
+                <div class="oc-item-val">Purchase Order: PO-2026-041</div>
+              </div>
+              <div class="oc-status-box">
+                <div class="oc-status-lbl">Status:</div>
+                <div class="oc-status-val status-transit">In Transit</div>
+              </div>
+            </div>
+            
+            <div class="oc-desc-box">
+              <div class="oc-desc-lbl">Description</div>
+              <div class="oc-desc-val">
+                Dispatched on April 6, 2026. Contains 10x NVIDIA RTX 5080 GPUs, 20x Intel Core i9-14900K CPUs. Estimated arrival April 8.
+              </div>
+            </div>
+
+            <div class="oc-actions">
+              <button class="btn-outline-pill">Track Shipment</button>
+              <button class="btn-solid-pill">Order Details</button>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="col-1 d-flex justify-content-center">
+          <div class="v-divider"></div>
+        </div>
+
+        <div class="col-4">
+          <div class="center-headline">SUMMARY OF<br>ORDERS</div>
+          
+          <div class="summary-dark-block">
+            <div class="sd-stat-row">
+              <div class="sd-stat-lbl">Total Orders Placed</div>
+              <div class="sd-stat-val">12</div>
+            </div>
+            
+            <div class="sd-stat-row">
+              <div class="sd-stat-lbl">Active Deliveries</div>
+              <div class="sd-stat-val" style="color: var(--accent);">1</div>
+            </div>
+            
+            <div class="sd-stat-row">
+              <div class="sd-stat-lbl">YTD Spend</div>
+              <div class="sd-stat-val" style="font-family: 'DM Mono', monospace;">₱ 4.2M</div>
+            </div>
+
+            <div class="sd-stat-row" style="border-bottom: none;">
+              <div class="sd-stat-lbl">Account Terms</div>
+              <div class="sd-stat-val" style="font-size: 16px;">Net 30</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div></div></div>
+<script src="sc-nav.js"></script>
+</body>
+</html>

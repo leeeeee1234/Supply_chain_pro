@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920">
+<title>SupplyChain Pro — Inventory List</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #f0f4f8;
+    --surface:   #ffffff;
+    --surface2:  #f5f8fb;
+    --accent:    #0ecfc4;
+    --accent-dk: #035e7b;
+    --accent-lt: #e4faf9;
+    --dark:      #000d16;
+    --text:      #1a2a3a;
+    --muted:     #666e83;
+    --border:    #dde4ef;
+    --red:       #d03030;
+    --red-bg:    #fff2f2;
+    --red-bd:    #f9c8c8;
+    --amber:     #b87000;
+    --amb-bg:    #fffbee;
+    --amb-bd:    #f7df9a;
+    --green:     #097a5e;
+    --grn-bg:    #edfaf5;
+    --sb-w:      230px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html, body {
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+  }
+
+  /* ── LAYOUT ───────────────────────────── */
+  .app { display: flex; width: 1920px; height: 1080px; }
+
+  /* ── SIDEBAR ──────────────────────────── */
+  .sidebar {
+    width: var(--sb-w);
+    min-width: var(--sb-w);
+    background: var(--dark);
+    display: flex;
+    flex-direction: column;
+    height: 1080px;
+  }
+
+  .sb-logo {
+    padding: 22px 22px 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+  .sb-brand { font-size: 14px; font-weight: 700; color: #fff; letter-spacing: 0.1px; }
+  .sb-chip {
+    display: inline-block; font-size: 8px; background: var(--accent);
+    color: var(--dark); border-radius: 3px; padding: 1px 5px;
+    font-weight: 800; letter-spacing: 0.8px; margin-left: 5px;
+    vertical-align: middle; position: relative; top: -1px;
+  }
+  .sb-sub { font-size: 10px; color: #4a5a6e; margin-top: 4px; }
+
+  .sb-nav { flex: 1; padding: 8px 0; overflow-y: auto; }
+  .sb-nav::-webkit-scrollbar { display: none; }
+
+  .nav-grp-lbl {
+    font-size: 9px; color: #3a4e62; letter-spacing: 1.6px;
+    text-transform: uppercase; padding: 14px 22px 5px; font-weight: 600;
+  }
+
+  .nav-link-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 22px; font-size: 12px; color: #6a82a0;
+    text-decoration: none; border-left: 2px solid transparent;
+    transition: all 0.15s; cursor: pointer;
+  }
+  .nav-link-item:hover { color: #b0c4d8; background: rgba(255,255,255,0.04); }
+  .nav-link-item.active {
+    color: #fff; background: rgba(14,207,196,0.1);
+    border-left-color: var(--accent); font-weight: 500;
+  }
+  .nav-link-item svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+  .nav-badge {
+    margin-left: auto; background: var(--accent); color: var(--dark);
+    font-size: 9px; font-weight: 800; border-radius: 10px;
+    padding: 1px 7px; letter-spacing: 0.3px;
+  }
+
+  .sb-user {
+    padding: 16px 22px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    display: flex; align-items: center; gap: 11px;
+  }
+  .user-ava {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--accent-dk); display: flex; align-items: center;
+    justify-content: center; font-size: 11px; font-weight: 700;
+    color: var(--accent); flex-shrink: 0;
+  }
+  .user-name { font-size: 12px; color: #fff; font-weight: 500; }
+  .user-role { font-size: 10px; color: #4a5a6e; margin-top: 1px; }
+
+  /* ── MAIN ─────────────────────────────── */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* ── TOPBAR ───────────────────────────── */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .pg-title { font-size: 16px; font-weight: 700; color: var(--dark); }
+  .pg-sub { font-size: 10px; color: var(--muted); margin-top: 1px; }
+
+  .btn-sc-ghost {
+    background: transparent; color: var(--muted);
+    border: 1px solid var(--border); border-radius: 7px;
+    padding: 7px 18px; font-size: 12px; font-family: inherit;
+    cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-sc-ghost:hover { border-color: var(--accent-dk); color: var(--accent-dk); }
+  
+  .btn-sc-primary {
+    background: var(--accent); color: var(--dark);
+    border: none; border-radius: 7px; padding: 7px 18px;
+    font-size: 12px; font-weight: 700; font-family: inherit;
+    cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-sc-primary:hover { background: var(--accent-dk); color: #fff; }
+
+  .btn-action-edit {
+    background: var(--accent); color: var(--dark); border: none;
+    border-radius: 5px; padding: 4px 14px; font-size: 10.5px; font-weight: 700; cursor: pointer; transition: all 0.15s;
+  }
+  .btn-action-edit:hover { background: var(--accent-dk); color: #fff; }
+
+  .btn-action-del {
+    background: transparent; color: var(--red); border: 1px solid var(--red-bd);
+    border-radius: 5px; padding: 3px 13px; font-size: 10.5px; font-weight: 600; cursor: pointer; transition: all 0.15s;
+  }
+  .btn-action-del:hover { background: var(--red-bg); }
+
+  /* ── FILTER BAR ───────────────────────── */
+  .filter-bar {
+    background: var(--surface2); border-bottom: 1px solid var(--border);
+    padding: 0 28px; height: 38px;
+    display: flex; align-items: center; gap: 8px;
+    flex-shrink: 0;
+  }
+  .fb-label { font-size: 10px; color: var(--muted); font-weight: 600; white-space: nowrap; }
+
+  .f-tag {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 10px; background: var(--accent-lt); color: var(--accent-dk);
+    border: 1px solid #abe8e4; border-radius: 5px; padding: 2px 9px;
+    font-weight: 600; white-space: nowrap;
+  }
+  .f-tag-x { cursor: pointer; opacity: 0.5; font-size: 12px; line-height: 1; }
+
+  .reset-view {
+    margin-left: auto; font-size: 10px; color: var(--red);
+    background: transparent; border: 1px solid var(--red-bd);
+    border-radius: 5px; padding: 3px 12px; font-family: inherit;
+    cursor: pointer; font-weight: 600;
+  }
+  .reset-view:hover { background: var(--red-bg); }
+
+  /* ── CONTENT ──────────────────────────── */
+  .content {
+    flex: 1; overflow-y: auto; padding: 20px 28px 20px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .content::-webkit-scrollbar { width: 5px; }
+  .content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* ── TABLE ────────────────────────────── */
+  .table-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden; flex: 1; display: flex; flex-direction: column;
+  }
+  .table-top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 22px 12px; border-bottom: 1px solid var(--border);
+  }
+
+  .sc-search {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 7px; padding: 6px 14px; font-size: 11px;
+    color: var(--text); font-family: inherit; width: 280px;
+  }
+  .sc-search::placeholder { color: var(--muted); }
+
+  .f-btns { display: flex; gap: 5px; }
+  .f-btn {
+    font-size: 10px; color: var(--muted); background: transparent;
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 4px 13px; cursor: pointer; font-family: inherit; transition: all 0.12s;
+  }
+  .f-btn:hover { border-color: var(--accent-dk); color: var(--accent-dk); }
+  .f-btn.on {
+    background: var(--accent-lt); border-color: #abe8e4;
+    color: var(--accent-dk); font-weight: 700;
+  }
+
+  .sc-table { width: 100%; border-collapse: collapse; }
+  .sc-table thead th {
+    font-size: 9.5px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 1px; padding: 12px 20px; text-align: left;
+    background: var(--surface2); border-bottom: 1px solid var(--border);
+    font-weight: 600; white-space: nowrap; position: sticky; top: 0; z-index: 2;
+  }
+  .sc-table tbody td {
+    font-size: 12px; color: var(--text); padding: 12px 20px;
+    border-bottom: 1px solid #edf1f7; vertical-align: middle;
+  }
+  .sc-table tbody tr:last-child td { border-bottom: none; }
+  .sc-table tbody tr:hover td { background: #f8fafd; }
+
+  .mono-lbl { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
+  .cat-lbl  { font-size: 10px; color: var(--muted); }
+  .price-lbl{ font-weight: 600; color: var(--dark); }
+
+  .badge-sc {
+    font-size: 9px; font-weight: 700; border-radius: 5px;
+    padding: 2px 9px; letter-spacing: 0.4px; display: inline-block;
+  }
+  .b-ok  { background: var(--grn-bg); color: var(--green); }
+  .b-low { background: var(--red-bg); color: var(--red); }
+  .b-ord { background: var(--amb-bg); color: var(--amber); }
+
+  .stk-wrap { display: flex; align-items: center; gap: 9px; }
+  .stk-bar  {
+    height: 5px; border-radius: 3px; background: #e8edf5;
+    flex: 1; min-width: 60px; max-width: 80px; overflow: hidden;
+  }
+  .stk-fill { height: 100%; border-radius: 3px; }
+  .stk-num  { font-size: 11px; color: var(--muted); min-width: 30px; text-align: right; }
+
+  .table-foot {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 22px; border-top: 1px solid var(--border); background: var(--surface);
+    margin-top: auto;
+  }
+  .foot-info { font-size: 10px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-brand">SupplyChain<span class="sb-chip">PRO</span></div>
+      <div class="sb-sub">B2B Wholesale · PC Components</div>
+    </div>
+
+    <nav class="sb-nav">
+      <div class="nav-grp-lbl">Main</div>
+
+      <a class="nav-link-item" href="dashboard-admin.html">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.2" fill="currentColor"/><rect x="9" y="1" width="6" height="6" rx="1.2" fill="currentColor" opacity=".45"/><rect x="1" y="9" width="6" height="6" rx="1.2" fill="currentColor" opacity=".45"/><rect x="9" y="9" width="6" height="6" rx="1.2" fill="currentColor" opacity=".45"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-link-item active" href="inventory-list.html" onclick="return false;">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3" width="13" height="10" rx="1.4" stroke="currentColor" stroke-width="1.2"/><path d="M5 8h6M8 5v6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Inventory
+      </a>
+      <a class="nav-link-item" href="supplier-purchase-order-inbox.html">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M2 2h9l2.5 3H2V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><rect x="2" y="5" width="12" height="9" rx="1.2" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 9.5h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Purchase Orders
+        <span class="nav-badge">4</span>
+      </a>
+      <a class="nav-link-item" onclick="alert('Invoices page not yet created')">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="1.5" width="12" height="13" rx="1.4" stroke="currentColor" stroke-width="1.2"/><path d="M5 5.5h6M5 8h6M5 10.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Invoices
+      </a>
+      <a class="nav-link-item" onclick="alert('Retailers page not yet created')">
+        <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.2"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Retailers
+      </a>
+
+      <div class="nav-grp-lbl" style="margin-top:4px;">Reports</div>
+      <a class="nav-link-item">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M2 12 L5 7 L8 9 L11 4 L14 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Analytics
+      </a>
+      <a class="nav-link-item">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3" width="13" height="10" rx="1.4" stroke="currentColor" stroke-width="1.2"/><path d="M5 8h2M9 6h2M5 10h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Sales Reports
+      </a>
+
+      <div class="nav-grp-lbl" style="margin-top:4px;">System</div>
+      <a class="nav-link-item">
+        <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3 3l1.1 1.1M11.9 11.9L13 13M3 13l1.1-1.1M11.9 4.1L13 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Settings
+      </a>
+    </nav>
+
+    <div class="sb-user">
+      <div class="user-ava">JD</div>
+      <div>
+        <div class="user-name">Juan Dela Cruz</div>
+        <div class="user-role">Supplier · Admin</div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+
+    <div class="topbar">
+      <div>
+        <div class="pg-title">Inventory Management System</div>
+        <div class="pg-sub">Manage wholesale catalog, bulk stock, and pricing tiers.</div>
+      </div>
+      <div class="d-flex align-items-center gap-3">
+        <button class="btn-sc-ghost">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Bulk Import
+        </button>
+        <button class="btn-sc-ghost">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          Export List
+        </button>
+        <button class="btn-sc-primary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          Add New Item
+        </button>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <span class="fb-label">Active filters:</span>
+      <div class="f-tag">Category: All <span class="f-tag-x">×</span></div>
+      <div class="f-tag">Supplier: All <span class="f-tag-x">×</span></div>
+      <div class="f-tag">Stock: Available <span class="f-tag-x">×</span></div>
+      <button class="reset-view">↺ Reset View</button>
+    </div>
+
+    <div class="content">
+
+      <div class="table-card" style="height: 100%;">
+        <div class="table-top">
+          <div class="d-flex align-items-center gap-2">
+            <div class="f-btns">
+              <button class="f-btn on">All Items</button>
+              <button class="f-btn">Low Stock</button>
+              <button class="f-btn">Out of Stock</button>
+              <button class="f-btn">Archived</button>
+            </div>
+            <span style="border-left: 1px solid var(--border); margin: 0 10px; height: 16px;"></span>
+            <div class="f-btns">
+              <button class="f-btn">GPU</button>
+              <button class="f-btn">CPU</button>
+              <button class="f-btn">Memory</button>
+              <button class="f-btn">Storage</button>
+            </div>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <input class="sc-search" placeholder="Search by Product Name, SKU, or Description...">
+          </div>
+        </div>
+
+        <div style="flex: 1; overflow-y: auto;">
+          <table class="sc-table">
+            <thead>
+              <tr>
+                <th>SKU / Serial</th>
+                <th>Product Details</th>
+                <th>Supplier</th>
+                <th>Category</th>
+                <th>Wholesale Pricing (Tier 1 / Tier 2)</th>
+                <th>Bulk Unit</th>
+                <th>Stock Level</th>
+                <th class="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="mono-lbl">GPU-5080-16G</span></td>
+                <td>
+                  <div style="font-weight: 600; color: var(--dark);">NVIDIA GeForce RTX 5080 16GB</div>
+                  <div style="font-size: 10px; color: var(--muted); margin-top: 2px;">Ada Lovelace Architecture, GDDR7</div>
+                </td>
+                <td><span class="cat-lbl">GlobalTech Distro</span></td>
+                <td><span class="cat-lbl">GPU</span></td>
+                <td>
+                  <div class="price-lbl">₱68,500 <span style="font-weight: 400; color: var(--muted); font-size: 10px;">/ ea (Tier 1)</span></div>
+                  <div style="font-size: 11px; color: var(--accent-dk);">₱65,200 <span style="font-weight: 400; font-size: 10px;">/ ea (Tier 2 - 10+ qty)</span></div>
+                </td>
+                <td class="text-muted" style="font-size:11px;">1 pc / box</td>
+                <td>
+                  <div class="stk-wrap">
+                    <div class="stk-bar"><div class="stk-fill" style="width:3%;background:#d03030;"></div></div>
+                    <span class="stk-num">5</span>
+                  </div>
+                  <div style="margin-top: 4px;"><span class="badge-sc b-low">LOW STOCK</span></div>
+                </td>
+                <td class="text-center">
+                  <div class="d-flex justify-content-center gap-2">
+                    <button class="btn-action-edit">Edit</button>
+                    <button class="btn-action-del">Delete</button>
+                  </div>
+                </td>
+              </tr>
+              
+              <tr>
+                <td><span class="mono-lbl">CPU-14900K-S</span></td>
+                <td>
+                  <div style="font-weight: 600; color: var(--dark);">Intel Core i9-14900K 3.2GHz</div>
+                  <div style="font-size: 10px; color: var(--muted); margin-top: 2px;">LGA1700, 36MB Cache, Unlocked</div>
+                </td>
+                <td><span class="cat-lbl">Intel Direct</span></td>
+                <td><span class="cat-lbl">CPU</span></td>
+                <td>
+                  <div class="price-lbl">₱24,900 <span style="font-weight: 400; color: var(--muted); font-size: 10px;">/ ea (Tier 1)</span></div>
+                  <div style="font-size: 11px; color: var(--accent-dk);">₱23,600 <span style="font-weight: 400; font-size: 10px;">/ ea (Tier 2 - 20+ qty)</span></div>
+                </td>
+                <td class="text-muted" style="font-size:11px;">1 pc / tray</td>
+                <td>
+                  <div class="stk-wrap">
+                    <div class="stk-bar"><div class="stk-fill" style="width:2%;background:#d03030;"></div></div>
+                    <span class="stk-num">3</span>
+                  </div>
+                  <div style="margin-top: 4px;"><span class="badge-sc b-low">LOW STOCK</span></div>
+                </td>
+                <td class="text-center">
+                  <div class="d-flex justify-content-center gap-2">
+                    <button class="btn-action-edit">Edit</button>
+                    <button class="btn-action-del">Delete</button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td><span class="mono-lbl">RAM-D5-32-6K</span></td>
+                <td>
+                  <div style="font-weight: 600; color: var(--dark);">Crucial DDR5 32GB Dual Kit</div>
+                  <div style="font-size: 10px; color: var(--muted); margin-top: 2px;">2x16GB, 6000MHz, CL36, RGB</div>
+                </td>
+                <td><span class="cat-lbl">MemoryMasters</span></td>
+                <td><span class="cat-lbl">Memory</span></td>
+                <td>
+                  <div class="price-lbl">₱8,200 <span style="font-weight: 400; color: var(--muted); font-size: 10px;">/ kit (Tier 1)</span></div>
+                  <div style="font-size: 11px; color: var(--accent-dk);">₱7,750 <span style="font-weight: 400; font-size: 10px;">/ kit (Tier 2 - 25+ qty)</span></div>
+                </td>
+                <td class="text-muted" style="font-size:11px;">5 kits / box</td>
+                <td>
+                  <div class="stk-wrap">
+                    <div class="stk-bar"><div class="stk-fill" style="width:32%;background:#b87000;"></div></div>
+                    <span class="stk-num">70</span>
+                  </div>
+                  <div style="margin-top: 4px;"><span class="badge-sc b-ord">REORDER SOON</span></div>
+                </td>
+                <td class="text-center">
+                  <div class="d-flex justify-content-center gap-2">
+                    <button class="btn-action-edit">Edit</button>
+                    <button class="btn-action-del">Delete</button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td><span class="mono-lbl">SSD-990P-2TB</span></td>
+                <td>
+                  <div style="font-weight: 600; color: var(--dark);">Samsung 990 Pro M.2 NVMe 2TB</div>
+                  <div style="font-size: 10px; color: var(--muted); margin-top: 2px;">PCIe 4.0, up to 7450 MB/s</div>
+                </td>
+                <td><span class="cat-lbl">GlobalTech Distro</span></td>
+                <td><span class="cat-lbl">Storage</span></td>
+                <td>
+                  <div class="price-lbl">₱7,800 <span style="font-weight: 400; color: var(--muted); font-size: 10px;">/ ea (Tier 1)</span></div>
+                  <div style="font-size: 11px; color: var(--accent-dk);">₱7,350 <span style="font-weight: 400; font-size: 10px;">/ ea (Tier 2 - 50+ qty)</span></div>
+                </td>
+                <td class="text-muted" style="font-size:11px;">10 pcs / carton</td>
+                <td>
+                  <div class="stk-wrap">
+                    <div class="stk-bar"><div class="stk-fill" style="width:80%;background:#0ecfc4;"></div></div>
+                    <span class="stk-num">390</span>
+                  </div>
+                  <div style="margin-top: 4px;"><span class="badge-sc b-ok">IN STOCK</span></div>
+                </td>
+                <td class="text-center">
+                  <div class="d-flex justify-content-center gap-2">
+                    <button class="btn-action-edit">Edit</button>
+                    <button class="btn-action-del">Delete</button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td><span class="mono-lbl">MB-Z790-ATX</span></td>
+                <td>
+                  <div style="font-weight: 600; color: var(--dark);">ASUS ROG Maximus Z790 Hero</div>
+                  <div style="font-size: 10px; color: var(--muted); margin-top: 2px;">ATX, LGA1700, DDR5, Wi-Fi 6E</div>
+                </td>
+                <td><span class="cat-lbl">ASUS Pacific</span></td>
+                <td><span class="cat-lbl">Motherboard</span></td>
+                <td>
+                  <div class="price-lbl">₱32,000 <span style="font-weight: 400; color: var(--muted); font-size: 10px;">/ ea (Tier 1)</span></div>
+                  <div style="font-size: 11px; color: var(--accent-dk);">₱30,400 <span style="font-weight: 400; font-size: 10px;">/ ea (Tier 2 - 5+ qty)</span></div>
+                </td>
+                <td class="text-muted" style="font-size:11px;">1 pc / box</td>
+                <td>
+                  <div class="stk-wrap">
+                    <div class="stk-bar"><div class="stk-fill" style="width:60%;background:#0ecfc4;"></div></div>
+                    <span class="stk-num">124</span>
+                  </div>
+                  <div style="margin-top: 4px;"><span class="badge-sc b-ok">IN STOCK</span></div>
+                </td>
+                <td class="text-center">
+                  <div class="d-flex justify-content-center gap-2">
+                    <button class="btn-action-edit">Edit</button>
+                    <button class="btn-action-del">Delete</button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td><span class="mono-lbl">PSU-1000W-80P</span></td>
+                <td>
+                  <div style="font-weight: 600; color: var(--dark);">Corsair RM1000x 80+ Gold</div>
+                  <div style="font-size: 10px; color: var(--muted); margin-top: 2px;">Fully Modular, ATX, 135mm Fan</div>
+                </td>
+                <td><span class="cat-lbl">PowerSystems Inc</span></td>
+                <td><span class="cat-lbl">PSU</span></td>
+                <td>
+                  <div class="price-lbl">₱9,400 <span style="font-weight: 400; color: var(--muted); font-size: 10px;">/ ea (Tier 1)</span></div>
+                  <div style="font-size: 11px; color: var(--accent-dk);">₱8,900 <span style="font-weight: 400; font-size: 10px;">/ ea (Tier 2 - 15+ qty)</span></div>
+                </td>
+                <td class="text-muted" style="font-size:11px;">5 pcs / pallet</td>
+                <td>
+                  <div class="stk-wrap">
+                    <div class="stk-bar"><div class="stk-fill" style="width:90%;background:#0ecfc4;"></div></div>
+                    <span class="stk-num">440</span>
+                  </div>
+                  <div style="margin-top: 4px;"><span class="badge-sc b-ok">IN STOCK</span></div>
+                </td>
+                <td class="text-center">
+                  <div class="d-flex justify-content-center gap-2">
+                    <button class="btn-action-edit">Edit</button>
+                    <button class="btn-action-del">Delete</button>
+                  </div>
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-foot">
+          <span class="foot-info">Showing 1 to 6 of 148 products &nbsp;·&nbsp; Page 1 of 25</span>
+          <div class="f-btns">
+            <button class="f-btn" disabled>← Prev</button>
+            <button class="f-btn on">1</button>
+            <button class="f-btn">2</button>
+            <button class="f-btn">3</button>
+            <button class="f-btn">…</button>
+            <button class="f-btn">25</button>
+            <button class="f-btn">Next →</button>
+          </div>
+        </div>
+      </div>
+
+    </div></div></div><script>
+// Filter button toggle
+document.querySelectorAll('.f-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const group = this.closest('.f-btns');
+    if (group) {
+      group.querySelectorAll('.f-btn').forEach(b => b.classList.remove('on'));
+      this.classList.add('on');
+    }
+  });
+});
+</script>
+<script src="sc-nav.js"></script>
+</body>
+</html>
